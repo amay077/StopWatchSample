@@ -13,7 +13,7 @@ import rx.functions.Func1;
 import rx.subscriptions.CompositeSubscription;
 
 /**
- * Created by hrnv on 2015/12/20.
+ * ViewModel と TextView のバインドを行う
  */
 public class TextViewBinder extends BaseBinder {
     private final TextView _textView;

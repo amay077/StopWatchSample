@@ -39,15 +39,18 @@ public class MainViewModel {
         _appContext = appContext;
         _stopWatch = getStopWatch();
 
-        time = _stopWatch.time.throttleFirst(10, TimeUnit.MILLISECONDS); // 表示用に10ms毎に間引き。View側でやってもよいかも。
+        // StopWatchModel のプロパティをそのまま公開してるだけ
         isRunning = _stopWatch.isRunning;
         laps = _stopWatch.laps;
         isVisibleMillis = _stopWatch.isVisibleMillis;
 
+        // 表示用にthrottleで10ms毎に間引き。View側でやってもよいかも。
+        time = _stopWatch.time.throttleFirst(10, TimeUnit.MILLISECONDS);
+        // ミリ秒以下表示有無に応じて、format書式文字列を切り替え（これはModelでやるべき？）
         timeFormat = _stopWatch.isVisibleMillis.map(new Func1<Boolean, String>() {
             @Override
             public String call(Boolean isVisibleMillis) {
-                return isVisibleMillis ? "mm:ss.SSS" : "mm:ss";
+                return isVisibleMillis ? "mm'ss''SSS" : "mm'ss";
             }
         });
     }

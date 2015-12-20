@@ -10,7 +10,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 
 /**
- * Created by hrnv on 2015/12/20.
+ * ViewModel と Button のバインドを行う
  */
 public class ButtonBinder extends TextViewBinder {
     private final Button _button;

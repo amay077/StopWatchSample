@@ -52,7 +52,7 @@ public class StopWatchModel implements Subscription {
      */
     public void lap() {
         final List<Long> newLaps = new ArrayList<>();
-        Collections.copy(_laps.getValue(), newLaps);
+        newLaps.addAll(_laps.getValue());
         newLaps.add(_time.getValue());
 
         _laps.onNext(Collections.unmodifiableList(newLaps));
@@ -76,6 +76,8 @@ public class StopWatchModel implements Subscription {
                 .compose(new Observable.Transformer<Long, Long>() {
                     @Override
                     public Observable<Long> call(Observable<Long> x) {
+                        // 開始時に Laps をクリア、実行中フラグをON
+                        _laps.onNext(Collections.<Long>emptyList());
                         _isRunningSerialized.onNext(true);
                         return x;
                     }
@@ -83,6 +85,7 @@ public class StopWatchModel implements Subscription {
                 .subscribe(new Action1<Long>() {
                     @Override
                     public void call(Long time) {
+                        // タイマー値を通知
                         _timeSerialized.onNext(time);
                     }
                 });
@@ -94,6 +97,7 @@ public class StopWatchModel implements Subscription {
             _timerSubscription = null;
         }
 
+        // 実行終了を通知
         _isRunningSerialized.onNext(false);
     }
 
