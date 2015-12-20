@@ -4,19 +4,26 @@ import android.content.Context;
 
 import com.amay077.stopwatchapp.App;
 import com.amay077.stopwatchapp.frameworks.Command;
+import com.amay077.stopwatchapp.frameworks.messengers.Messenger;
+import com.amay077.stopwatchapp.frameworks.messengers.ShowToastMessages;
+import com.amay077.stopwatchapp.frameworks.messengers.StartActivityMessage;
 import com.amay077.stopwatchapp.models.StopWatchModel;
+import com.amay077.stopwatchapp.views.LapActivity;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
+import rx.Subscription;
+import rx.functions.Action1;
 import rx.functions.Func1;
 
-public class MainViewModel {
+public class MainViewModel implements Subscription {
+
+    public final Messenger messenger = new Messenger();
 
     private final Context _appContext;
     private final StopWatchModel _stopWatch;
-
     private StopWatchModel getStopWatch() {
         return ((App)_appContext).getStopWatch();
     }
@@ -50,7 +57,27 @@ public class MainViewModel {
         timeFormat = _stopWatch.isVisibleMillis.map(new Func1<Boolean, String>() {
             @Override
             public String call(Boolean isVisibleMillis) {
-                return isVisibleMillis ? "mm'ss''SSS" : "mm'ss";
+                return isVisibleMillis ? "mm:ss.SSS" : "mm:ss";
+            }
+        });
+
+        // STOP されたら、最速／最遅ラップを表示して、LapActivity へ遷移
+        isRunning.filter(new Func1<Boolean, Boolean>() {
+            @Override
+            public Boolean call(Boolean isRunning) {
+                return !isRunning;
+            }
+        })
+        .subscribe(new Action1<Boolean>() {
+            @Override
+            public void call(Boolean notUse) {
+                // Toast を表示させる
+                messenger.send(new ShowToastMessages(
+                        "最速ラップ:" + _stopWatch.getFastestLap() + // FIXME 時間がformatされてない
+                        ", 最遅ラップ:" + _stopWatch.getWorstLap()));
+
+                // LapActivity へ遷移させる
+                messenger.send(new StartActivityMessage(LapActivity.class)); // ホントは LapViewModel を指定して画面遷移すべき
             }
         });
     }
@@ -96,4 +123,13 @@ public class MainViewModel {
         }
     };
 
+    @Override
+    public void unsubscribe() {
+        messenger.unsubscribe();
+    }
+
+    @Override
+    public boolean isUnsubscribed() {
+        return messenger.isUnsubscribed();
+    }
 }

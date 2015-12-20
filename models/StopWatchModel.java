@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subjects.BehaviorSubject;
 import rx.subjects.SerializedSubject;
@@ -47,25 +48,6 @@ public class StopWatchModel implements Subscription {
         }
     }
 
-    /**
-     * 経過時間を記録する(経過時間を laps プロパティに追加する)
-     */
-    public void lap() {
-        final List<Long> newLaps = new ArrayList<>();
-        newLaps.addAll(_laps.getValue());
-        newLaps.add(_time.getValue());
-
-        _laps.onNext(Collections.unmodifiableList(newLaps));
-    }
-
-    /**
-     * 小数点以下の表示有無を切り替える（isVisibleMillis プロパティを toggle する）
-     */
-    public void toggleVisibleMillis() {
-        _isVisibleMillis.onNext(!_isVisibleMillis.getValue());
-    }
-
-
     private void start() {
         if (_isRunning.getValue()) {
             stop();
@@ -73,22 +55,22 @@ public class StopWatchModel implements Subscription {
 
         _timerSubscription =
                 Observable.interval(1, TimeUnit.MILLISECONDS, Schedulers.newThread())
-                .compose(new Observable.Transformer<Long, Long>() {
-                    @Override
-                    public Observable<Long> call(Observable<Long> x) {
-                        // 開始時に Laps をクリア、実行中フラグをON
-                        _laps.onNext(Collections.<Long>emptyList());
-                        _isRunningSerialized.onNext(true);
-                        return x;
-                    }
-                })
-                .subscribe(new Action1<Long>() {
-                    @Override
-                    public void call(Long time) {
-                        // タイマー値を通知
-                        _timeSerialized.onNext(time);
-                    }
-                });
+                        .compose(new Observable.Transformer<Long, Long>() {
+                            @Override
+                            public Observable<Long> call(Observable<Long> x) {
+                                // 開始時に Laps をクリア、実行中フラグをON
+                                _laps.onNext(Collections.<Long>emptyList());
+                                _isRunningSerialized.onNext(true);
+                                return x;
+                            }
+                        })
+                        .subscribe(new Action1<Long>() {
+                            @Override
+                            public void call(Long time) {
+                                // タイマー値を通知
+                                _timeSerialized.onNext(time);
+                            }
+                        });
     }
 
     private void stop() {
@@ -99,6 +81,52 @@ public class StopWatchModel implements Subscription {
 
         // 実行終了を通知
         _isRunningSerialized.onNext(false);
+    }
+
+    /**
+     * 経過時間を記録する(経過時間を laps プロパティに追加する)
+     */
+    public void lap() {
+        final List<Long> laps = _laps.getValue();
+        final List<Long> newLaps = new ArrayList<>();
+
+        newLaps.addAll(laps);
+
+        long totalLap = 0L;
+        for (Long lap:laps) {
+            totalLap += lap;
+        }
+
+        newLaps.add(_time.getValue() - totalLap);
+
+        _laps.onNext(Collections.unmodifiableList(newLaps));
+    }
+
+    /** 最速ラップを取得(返り値でなく、Observableなプロパティにした方がホントはよい) */
+    public Long getFastestLap() {
+        final List<Long> laps = _laps.getValue();
+        if (laps.size() == 0) {
+            return null; // nullを使うことを許したまえ
+        } else {
+            return Collections.min(laps);
+        }
+    }
+
+    /** 最遅ラップを取得(返り値でなく、Observableなプロパティにした方がホントはよい) */
+    public Long getWorstLap() {
+        final List<Long> laps = _laps.getValue();
+        if (laps.size() == 0) {
+            return null; // nullを使うことを許したまえ
+        } else {
+            return Collections.max(laps);
+        }
+    }
+
+    /**
+     * 小数点以下の表示有無を切り替える（isVisibleMillis プロパティを toggle する）
+     */
+    public void toggleVisibleMillis() {
+        _isVisibleMillis.onNext(!_isVisibleMillis.getValue());
     }
 
     // Subscription インターフェースの実装
