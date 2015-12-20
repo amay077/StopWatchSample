@@ -12,4 +12,9 @@ public class App extends Application {
         return _stopWatch;
     }
 
+    @Override
+    public void onTerminate() {
+        _stopWatch.unsubscribe();
+        super.onTerminate();
+    }
 }
