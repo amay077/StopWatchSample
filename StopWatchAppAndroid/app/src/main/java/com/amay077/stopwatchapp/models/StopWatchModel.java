@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import rx.Observable;
 import rx.Subscription;
@@ -53,6 +54,8 @@ public class StopWatchModel implements Subscription {
             stop();
         }
 
+        final AtomicLong startTime = new AtomicLong();
+
         _timerSubscription =
                 Observable.interval(1, TimeUnit.MILLISECONDS, Schedulers.newThread())
                         .compose(new Observable.Transformer<Long, Long>() {
@@ -61,14 +64,15 @@ public class StopWatchModel implements Subscription {
                                 // 開始時に Laps をクリア、実行中フラグをON
                                 _laps.onNext(Collections.<Long>emptyList());
                                 _isRunningSerialized.onNext(true);
+                                startTime.set(System.currentTimeMillis());
                                 return x;
                             }
                         })
                         .subscribe(new Action1<Long>() {
                             @Override
-                            public void call(Long time) {
+                            public void call(Long notUse) {
                                 // タイマー値を通知
-                                _timeSerialized.onNext(time);
+                                _timeSerialized.onNext(System.currentTimeMillis() - startTime.get());
                             }
                         });
     }
