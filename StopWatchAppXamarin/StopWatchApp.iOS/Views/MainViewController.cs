@@ -33,7 +33,7 @@ namespace StopWatchApp.iOS.Views
 			_viewModel = new MainViewModel(UIApplication.SharedApplication.Delegate as IModelPool);
 
 			// UILabel(labelTime) のバインド
-			labelTime.SetBindingToText(_viewModel.Time
+			labelTime.SetBinding(v => v.Text, _viewModel.Time
 				.CombineLatest(
 					_viewModel.TimeFormat,
 					(t, f) => TimeSpan.FromMilliseconds(t).ToString(f))
@@ -45,12 +45,9 @@ namespace StopWatchApp.iOS.Views
 			buttonStartStop.TouchUpInsideAsObservable()
 				.SetCommand(_viewModel.CommandStartOrStop)
 				.AddTo(_subscriptionOnLoad);
-			buttonStartStop.SetBindingToEnabled(
-				_viewModel.CommandStartOrStop.CanExecuteChangedAsObservable()
-				.Select(_=>_viewModel.CommandStartOrStop.CanExecute()))
-				.AddTo(_subscriptionOnLoad);
 			buttonStartStop
-				.SetBindingToText(
+				.SetBindingEx(
+					(v, value) => v.SetTitle(value, UIControlState.Normal),
 					_viewModel.IsRunning.Select(x => x ? "STOP" : "START")
 					.ObserveOnUIDispatcher()
 					.ToReactiveProperty())
@@ -61,10 +58,13 @@ namespace StopWatchApp.iOS.Views
 				.TouchUpInsideAsObservable()
 				.SetCommand(_viewModel.CommandLap)
 				.AddTo(_subscriptionOnLoad);
+			buttonLap.SetBinding(
+				v=>v.Enabled, _viewModel.IsRunning)
+				.AddTo(_subscriptionOnLoad);
 
 			// UISwitch(switchVisibleMillis) のバインド
 			switchVisibleMillis
-				.SetBindingToChecked(_viewModel.IsVisibleMillis)
+				.SetBinding(v=>v.On, _viewModel.IsVisibleMillis)
 				.AddTo(_subscriptionOnLoad);
 			switchVisibleMillis.TouchUpInsideAsObservable()
 				.SetCommand(_viewModel.CommandToggleVisibleMillis)

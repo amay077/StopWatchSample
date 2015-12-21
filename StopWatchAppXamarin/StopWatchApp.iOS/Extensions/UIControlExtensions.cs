@@ -25,14 +25,6 @@ namespace StopWatchApp.iOS.Extensions
 				});
 			});
 		}
-
-		public static IDisposable SetBindingToEnabled(this UIControl self, IObservable<bool> prop)
-		{
-			return prop
-				.ObserveOnUIDispatcher()
-				.Subscribe(x => self.Enabled = x);
-		}
-
 	}
 }
 

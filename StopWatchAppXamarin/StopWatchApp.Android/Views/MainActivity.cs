@@ -46,7 +46,7 @@ namespace StopWatchApp.Android.Views
 					_viewModel.Time
 					.CombineLatest(
 						_viewModel.TimeFormat,
-						(t, f) => TimeSpan.FromMilliseconds(t).ToString(@"mm\:ss\.fff"))
+						(t, f) => TimeSpan.FromMilliseconds(t).ToString(f))
 					.ObserveOnUIDispatcher()
 					.ToReactiveProperty())
 				.AddTo(_subscriptionOnCreate);
@@ -64,10 +64,14 @@ namespace StopWatchApp.Android.Views
 				.AddTo(_subscriptionOnCreate);
 
 			// Button(buttonLap) のバインド
-			FindViewById<Button> (Resource.Id.buttonLap)
+			var buttonLap = FindViewById<Button> (Resource.Id.buttonLap);
+			buttonLap
 				.ClickAsObservable().SetCommand(_viewModel.CommandLap)
 				.AddTo(_subscriptionOnCreate);
-
+			buttonLap.SetBinding(
+				v=>v.Enabled, _viewModel.IsRunning)
+				.AddTo(_subscriptionOnCreate);
+			
 			// Switch(switchVisibleMillis) のバインド
 			var switchVisibleMillis = FindViewById<Switch>(Resource.Id.switchVisibleMillis);
 			switchVisibleMillis
@@ -82,12 +86,10 @@ namespace StopWatchApp.Android.Views
 			// ListView(listLaps, ArrayAdapter) のバインド
 			// フォーマットされた経過時間群を表す Observable（time と timeFormat のどちらかが変更されたら更新）
 			var formattedLaps = _viewModel.Laps.CombineLatest(
-				_viewModel.TimeFormat, (laps, f) => {
-					var sdf = new SimpleDateFormat(f, Locale.Default);
-					return laps.Select((x, i) => $"{i+1}.  {sdf.Format(new Date(x))}");
-				})
+				_viewModel.TimeFormat, 
+				(laps, f) => laps.Select((x, i) => $"{i+1}.  {TimeSpan.FromMilliseconds(x).ToString(f)}"))
 				.ToReactiveProperty();
-			
+
 			var listLaps = FindViewById<ListView>(Resource.Id.listLaps);
 			var listAdapter = new ArrayAdapter(this, global::Android.Resource.Layout.SimpleListItem1);
 			listLaps.Adapter = listAdapter;

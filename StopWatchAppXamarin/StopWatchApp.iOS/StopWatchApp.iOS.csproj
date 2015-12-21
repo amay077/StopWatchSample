@@ -115,9 +115,6 @@
     <Compile Include="AppDelegate.cs" />
     <Compile Include="Extensions\UIControlExtensions.cs" />
     <Compile Include="Extensions\BindingSupportExtensions.cs" />
-    <Compile Include="Extensions\UILabelExtensions.cs" />
-    <Compile Include="Extensions\UIButtonExtensions.cs" />
-    <Compile Include="Extensions\UISwitchExtensions.cs" />
     <Compile Include="Extensions\UITableViewExtensions.cs" />
     <Compile Include="Views\MainViewController.cs" />
     <Compile Include="Views\MainViewController.designer.cs">
@@ -128,11 +125,13 @@
       <DependentUpon>LapViewController.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\LapTableSource.cs" />
+    <Compile Include="Extensions\Internal\AccessorCache.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <ItemGroup>
     <Folder Include="Extensions\" />
     <Folder Include="Views\" />
+    <Folder Include="Extensions\Internal\" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>

@@ -35,10 +35,8 @@ namespace StopWatchApp.Android.Views
 			// ListView(listLaps, ArrayAdapter) のバインド
 			// フォーマットされた経過時間群を表す Observable（time と timeFormat のどちらかが変更されたら更新）
 			var formattedLaps = _viewModel.Laps.CombineLatest(
-				_viewModel.TimeFormat, (laps, f) => {
-					var sdf = new SimpleDateFormat(f, Locale.Default);
-					return laps.Select((x, i) => $"{i+1}.  {sdf.Format(new Date(x))}");
-				})
+				_viewModel.TimeFormat, 
+				(laps, f) => laps.Select((x, i) => $"{i+1}.  {TimeSpan.FromMilliseconds(x).ToString(f)}"))
 				.ToReactiveProperty();
 
 			var listLaps = FindViewById<ListView>(Resource.Id.listLaps);
