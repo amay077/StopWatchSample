@@ -49,7 +49,7 @@ namespace StopWatchApp.Core.ViewModels
 			Laps = stopWatch.Laps;
 			IsVisibleMillis = stopWatch.IsVisibleMillis;
 
-			// 表示用にthrottleで10ms毎に間引き。View側でやってもよいかも。
+			// 表示用にthrottleで20ms毎に間引き。View側でやってもよいかも。
 			Time = stopWatch.Time.Throttle(TimeSpan.FromMilliseconds(20), Scheduler.Immediate).ToReactiveProperty();
 			// ミリ秒以下表示有無に応じて、format書式文字列を切り替え（これはModelでやるべき？）
 			TimeFormat = stopWatch.IsVisibleMillis.Select(x => x ? "mm:ss.SSS" : "mm:ss").ToReactiveProperty();
