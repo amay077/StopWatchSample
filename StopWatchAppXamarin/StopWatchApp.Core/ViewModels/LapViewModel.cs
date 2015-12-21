@@ -20,7 +20,7 @@ namespace StopWatchApp.Core.ViewModels
 
 			Laps = stopWatch.Laps;
 			// ミリ秒以下表示有無に応じて、format書式文字列を切り替え（これはModelでやるべき？）
-			TimeFormat = stopWatch.IsVisibleMillis.Select(x => x ? "mm:ss.SSS" : "mm:ss").ToReactiveProperty();
+			TimeFormat = stopWatch.IsVisibleMillis.Select(x => x ? @"mm\:ss\.fff" : @"mm\:ss").ToReactiveProperty();
 		}
 
 		#region IDisposable implementation

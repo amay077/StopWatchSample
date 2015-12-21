@@ -2,7 +2,7 @@
 using UIKit;
 using Foundation;
 
-namespace StopWatchApp.iOS
+namespace StopWatchApp.iOS.Views
 {
 	public class LapTableSource : UITableViewSource 
 	{

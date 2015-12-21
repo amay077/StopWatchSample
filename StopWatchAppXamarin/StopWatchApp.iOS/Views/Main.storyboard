@@ -45,41 +45,35 @@
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="41" translatesAutoresizingMaskIntoConstraints="NO">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="41">
                                 <rect key="frame" x="38" y="-154" width="198" height="211"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <prototypes>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="42" rowHeight="44">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" rowHeight="44" id="42">
                                         <rect key="frame" x="0.0" y="22" width="198" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
-                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="43" tableViewCell="42">
-                                            <rect key="frame" x="0.0" y="0.0" width="198" height="43"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="42" id="Bkx-q0-3sh">
+                                            <rect key="frame" x="0.0" y="0.0" width="198" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
-                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
-                                        </view>
+                                        </tableViewCellContentView>
                                     </tableViewCell>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="44" rowHeight="44">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" rowHeight="44" id="44">
                                         <rect key="frame" x="0.0" y="66" width="198" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
-                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="45" tableViewCell="44">
-                                            <rect key="frame" x="0.0" y="0.0" width="198" height="43"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="44" id="0Ik-Xv-gQL">
+                                            <rect key="frame" x="0.0" y="0.0" width="198" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
-                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
-                                        </view>
+                                        </tableViewCellContentView>
                                     </tableViewCell>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="46" rowHeight="44">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" rowHeight="44" id="46">
                                         <rect key="frame" x="0.0" y="110" width="198" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
-                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="47" tableViewCell="46">
-                                            <rect key="frame" x="0.0" y="0.0" width="198" height="43"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="46" id="DH7-Ar-7na">
+                                            <rect key="frame" x="0.0" y="0.0" width="198" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
-                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
-                                        </view>
+                                        </tableViewCellContentView>
                                     </tableViewCell>
                                 </prototypes>
-                                <variation key="heightClass=regular-widthClass=compact">
-                                    <rect key="frame" x="21" y="236" width="278" height="322"/>
-                                </variation>
                             </tableView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
@@ -124,16 +118,16 @@
                             <constraint firstItem="23" firstAttribute="centerY" secondItem="22" secondAttribute="centerY" constant="8.25" id="28">
                                 <variation key="heightClass=regular-widthClass=compact" constant="1.25"/>
                             </constraint>
-                            <constraint id="48" firstItem="41" firstAttribute="top" secondItem="23" secondAttribute="bottom" constant="78">
+                            <constraint firstItem="41" firstAttribute="top" secondItem="23" secondAttribute="bottom" constant="78" id="48">
                                 <variation key="heightClass=regular-widthClass=compact" constant="20"/>
                             </constraint>
-                            <constraint id="49" firstItem="41" firstAttribute="leading" secondItem="3" secondAttribute="leading" constant="18">
+                            <constraint firstItem="41" firstAttribute="leading" secondItem="3" secondAttribute="leading" constant="18" id="49">
                                 <variation key="heightClass=regular-widthClass=compact" constant="1"/>
                             </constraint>
-                            <constraint id="50" firstItem="3" firstAttribute="trailing" secondItem="41" secondAttribute="trailing" constant="64">
+                            <constraint firstItem="3" firstAttribute="trailing" secondItem="41" secondAttribute="trailing" constant="64" id="50">
                                 <variation key="heightClass=regular-widthClass=compact" constant="1"/>
                             </constraint>
-                            <constraint id="51" firstItem="41" firstAttribute="bottom" secondItem="wfy-db-euE" secondAttribute="top" constant="1">
+                            <constraint firstItem="41" firstAttribute="bottom" secondItem="wfy-db-euE" secondAttribute="top" constant="1" id="51">
                                 <variation key="heightClass=regular-widthClass=compact" constant="-10"/>
                             </constraint>
                         </constraints>
@@ -147,12 +141,16 @@
                                 <exclude reference="41"/>
                             </mask>
                             <mask key="constraints">
+                                <exclude reference="48"/>
+                                <exclude reference="49"/>
+                                <exclude reference="51"/>
                                 <exclude reference="6"/>
                                 <exclude reference="7"/>
                                 <exclude reference="8"/>
                                 <exclude reference="15"/>
                                 <exclude reference="20"/>
                                 <exclude reference="24"/>
+                                <exclude reference="50"/>
                                 <exclude reference="16"/>
                                 <exclude reference="17"/>
                                 <exclude reference="19"/>
@@ -161,10 +159,6 @@
                                 <exclude reference="28"/>
                                 <exclude reference="25"/>
                                 <exclude reference="27"/>
-                                <exclude reference="48"/>
-                                <exclude reference="49"/>
-                                <exclude reference="50"/>
-                                <exclude reference="51"/>
                             </mask>
                         </variation>
                         <variation key="heightClass=regular-widthClass=compact">
@@ -177,12 +171,16 @@
                                 <include reference="41"/>
                             </mask>
                             <mask key="constraints">
+                                <include reference="48"/>
+                                <include reference="49"/>
+                                <include reference="51"/>
                                 <include reference="6"/>
                                 <include reference="7"/>
                                 <include reference="8"/>
                                 <include reference="15"/>
                                 <include reference="20"/>
                                 <include reference="24"/>
+                                <include reference="50"/>
                                 <include reference="16"/>
                                 <include reference="17"/>
                                 <include reference="19"/>
@@ -191,10 +189,6 @@
                                 <include reference="28"/>
                                 <include reference="25"/>
                                 <include reference="27"/>
-                                <include reference="48"/>
-                                <include reference="49"/>
-                                <include reference="50"/>
-                                <include reference="51"/>
                             </mask>
                         </variation>
                     </view>
@@ -204,11 +198,43 @@
                         <outlet property="labelTime" destination="3" id="name-outlet-3"/>
                         <outlet property="switchVisibleMillis" destination="22" id="name-outlet-22"/>
                         <outlet property="tableLaps" destination="41" id="name-outlet-41"/>
+                        <segue destination="56" kind="show" id="jVM-0l-MiG" identifier="goto_lap"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="0.0" y="0.0"/>
+            <point key="canvasLocation" x="60" y="5"/>
+        </scene>
+        <!--Table View Controller-->
+        <scene sceneID="55">
+            <objects>
+                <tableViewController id="56" sceneMemberID="viewController" customClass="LapViewController">
+                    <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="57">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <prototypes>
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" rowHeight="44" id="60">
+                                <rect key="frame" x="0.0" y="22" width="600" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="60" id="61">
+                                    <rect key="frame" x="0.0" y="0.0" width="600" height="43.5"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="56" id="58"/>
+                            <outlet property="delegate" destination="56" id="59"/>
+                        </connections>
+                    </tableView>
+                    <connections>
+                        <outlet property="tableLaps" destination="57" id="name-outlet-57"/>
+                    </connections>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="62" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="762" y="5"/>
         </scene>
     </scenes>
     <simulatedMetricsContainer key="defaultSimulatedMetrics">

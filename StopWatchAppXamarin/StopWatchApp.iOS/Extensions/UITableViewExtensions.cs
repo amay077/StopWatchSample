@@ -3,6 +3,7 @@ using UIKit;
 using System.Collections.Generic;
 using Reactive.Bindings.Extensions;
 using System.Linq;
+using StopWatchApp.iOS.Views;
 
 namespace StopWatchApp.iOS.Extensions
 {

@@ -12,8 +12,9 @@ using System.Reactive.Disposables;
 using System.Diagnostics;
 using StopWatchApp.Core.Frameworks.Messengers;
 using System.Linq;
+using Xamarin.Controls;
 
-namespace StopWatchApp.iOS
+namespace StopWatchApp.iOS.Views
 {
 	partial class MainViewController : UIViewController
 	{
@@ -84,14 +85,27 @@ namespace StopWatchApp.iOS
 
 			// 画面遷移のメッセージ受信
 			_viewModel.Messenger.Register(typeof(StartViewMessage).Name, message => InvokeOnMainThread(() => {
+				PerformSegue("goto_lap", this);
 			}));
 
 			// トースト表示のメッセージ受信
 			_viewModel.Messenger.Register (typeof(ShowToastMessage).Name, message => InvokeOnMainThread(() => {
 				var m = message as ShowToastMessage;
-//				Toast.MakeText(this, m.Text, ToastLength.Long).Show();
+				AlertCenter.Default.PostMessage ("Notification", m.Text);
 			}));
 			
+		}
+
+		public override void ViewDidUnload ()
+		{
+			// unsubscribe しないと Activity がリークするよ
+			_subscriptionOnLoad.Dispose();
+			_subscriptionOnLoad.Clear();
+
+			if (_viewModel != null) {
+				_viewModel.Dispose ();
+			}
+			base.ViewDidUnload();
 		}
 	}
 }

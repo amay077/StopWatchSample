@@ -9,7 +9,7 @@ using System;
 using System.CodeDom.Compiler;
 using UIKit;
 
-namespace StopWatchApp.iOS
+namespace StopWatchApp.iOS.Views
 {
 	[Register ("MainViewController")]
 	partial class MainViewController

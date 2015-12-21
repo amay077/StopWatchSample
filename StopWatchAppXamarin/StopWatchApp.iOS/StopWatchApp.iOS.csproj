@@ -94,13 +94,16 @@
     <Reference Include="ReactiveProperty">
       <HintPath>..\packages\ReactiveProperty.2.3.1\lib\portable-net45+WP8+win8+wpa81+MonoTouch+MonoAndroid\ReactiveProperty.dll</HintPath>
     </Reference>
+    <Reference Include="AlertCenter.IOS">
+      <HintPath>..\Components\alert-center-1.0.6\lib\ios-unified\AlertCenter.IOS.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ImageAsset Include="Resources\Images.xcassets\AppIcons.appiconset\Contents.json" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Resources\LaunchScreen.xib" />
-    <InterfaceDefinition Include="Main.storyboard" />
+    <InterfaceDefinition Include="Views\Main.storyboard" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -110,21 +113,26 @@
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
-    <Compile Include="MainViewController.cs" />
-    <Compile Include="MainViewController.designer.cs">
-      <DependentUpon>MainViewController.cs</DependentUpon>
-    </Compile>
     <Compile Include="Extensions\UIControlExtensions.cs" />
     <Compile Include="Extensions\BindingSupportExtensions.cs" />
     <Compile Include="Extensions\UILabelExtensions.cs" />
     <Compile Include="Extensions\UIButtonExtensions.cs" />
     <Compile Include="Extensions\UISwitchExtensions.cs" />
-    <Compile Include="LapTableSource.cs" />
     <Compile Include="Extensions\UITableViewExtensions.cs" />
+    <Compile Include="Views\MainViewController.cs" />
+    <Compile Include="Views\MainViewController.designer.cs">
+      <DependentUpon>MainViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LapViewController.cs" />
+    <Compile Include="Views\LapViewController.designer.cs">
+      <DependentUpon>LapViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LapTableSource.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <ItemGroup>
     <Folder Include="Extensions\" />
+    <Folder Include="Views\" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
@@ -140,5 +148,11 @@
       <Project>{E1129E62-F7AA-4D23-B5FA-106BA2F8AC85}</Project>
       <Name>StopWatchApp.Core</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <XamarinComponentReference Include="alert-center">
+      <Version>1.0.6</Version>
+      <Visible>False</Visible>
+    </XamarinComponentReference>
   </ItemGroup>
 </Project>
