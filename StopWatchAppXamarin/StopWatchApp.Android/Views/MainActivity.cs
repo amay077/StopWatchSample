@@ -42,14 +42,11 @@ namespace StopWatchApp.Android.Views
 			// TextView(textTime) のバインド
 			FindViewById<TextView>(Resource.Id.textTime)
 				.SetBinding(v => v.Text, 
-				// フォーマットされた時間を表す Observable（time と timeFormat のどちらかが変更されたら更新）
+					// フォーマットされた時間を表す Observable（time と timeFormat のどちらかが変更されたら更新）
 					_viewModel.Time
 					.CombineLatest(
-					_viewModel.TimeFormat,
-					(t, f) => {
-						var sdf = new SimpleDateFormat(f, Locale.Default);
-						return sdf.Format(new Date(t));
-					})
+						_viewModel.TimeFormat,
+						(t, f) => TimeSpan.FromMilliseconds(t).ToString(@"mm\:ss\.fff"))
 					.ObserveOnUIDispatcher()
 					.ToReactiveProperty())
 				.AddTo(_subscriptionOnCreate);

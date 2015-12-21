@@ -52,7 +52,7 @@ namespace StopWatchApp.Core.ViewModels
 			// 表示用にthrottleで20ms毎に間引き。View側でやってもよいかも。
 			Time = stopWatch.Time.Throttle(TimeSpan.FromMilliseconds(20), Scheduler.Immediate).ToReactiveProperty();
 			// ミリ秒以下表示有無に応じて、format書式文字列を切り替え（これはModelでやるべき？）
-			TimeFormat = stopWatch.IsVisibleMillis.Select(x => x ? "mm:ss.SSS" : "mm:ss").ToReactiveProperty();
+			TimeFormat = stopWatch.IsVisibleMillis.Select(x => x ? @"mm\:ss\.fff" : @"mm\:ss").ToReactiveProperty();
 
 			// STOP されたら、最速／最遅ラップを表示して、LapActivity へ遷移
 			IsRunning.Where(x => !x)
