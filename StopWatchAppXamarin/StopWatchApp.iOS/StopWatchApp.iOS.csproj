@@ -119,6 +119,8 @@
     <Compile Include="Extensions\UILabelExtensions.cs" />
     <Compile Include="Extensions\UIButtonExtensions.cs" />
     <Compile Include="Extensions\UISwitchExtensions.cs" />
+    <Compile Include="LapTableSource.cs" />
+    <Compile Include="Extensions\UITableViewExtensions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <ItemGroup>

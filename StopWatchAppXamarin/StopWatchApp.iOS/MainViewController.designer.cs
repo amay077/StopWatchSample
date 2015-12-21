@@ -30,6 +30,10 @@ namespace StopWatchApp.iOS
 		[GeneratedCode ("iOS Designer", "1.0")]
 		UISwitch switchVisibleMillis { get; set; }
 
+		[Outlet]
+		[GeneratedCode ("iOS Designer", "1.0")]
+		UITableView tableLaps { get; set; }
+
 		void ReleaseDesignerOutlets ()
 		{
 			if (buttonLap != null) {
@@ -47,6 +51,10 @@ namespace StopWatchApp.iOS
 			if (switchVisibleMillis != null) {
 				switchVisibleMillis.Dispose ();
 				switchVisibleMillis = null;
+			}
+			if (tableLaps != null) {
+				tableLaps.Dispose ();
+				tableLaps = null;
 			}
 		}
 	}

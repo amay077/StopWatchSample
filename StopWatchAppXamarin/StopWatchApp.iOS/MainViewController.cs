@@ -11,6 +11,7 @@ using Reactive.Bindings;
 using System.Reactive.Disposables;
 using System.Diagnostics;
 using StopWatchApp.Core.Frameworks.Messengers;
+using System.Linq;
 
 namespace StopWatchApp.iOS
 {
@@ -67,6 +68,17 @@ namespace StopWatchApp.iOS
 			switchVisibleMillis.TouchUpInsideAsObservable()
 				.SetCommand(_viewModel.CommandToggleVisibleMillis)
 				.AddTo(_subscriptionOnLoad);
+
+
+			// ListView(listLaps, ArrayAdapter) のバインド
+			// フォーマットされた経過時間群を表す Observable（time と timeFormat のどちらかが変更されたら更新）
+			var formattedLaps = _viewModel.Laps.CombineLatest(
+				_viewModel.TimeFormat, 
+				(laps, f) => laps.Select((x, i) => $"{i+1}.  {TimeSpan.FromMilliseconds(x).ToString(f)}"))
+				.ToReactiveProperty();
+			tableLaps.SetBindingToSource(formattedLaps)
+				.AddTo(_subscriptionOnLoad);
+
 
 			// ■ViewModel からの Message の受信
 
