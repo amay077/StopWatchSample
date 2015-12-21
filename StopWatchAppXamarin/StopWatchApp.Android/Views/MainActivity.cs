@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using StopWatchApp.Android.Extensions;
 using System.Linq;
 
-namespace StopWatchApp.Android
+namespace StopWatchApp.Android.Views
 {
 	[Activity (Label = "StopWatchAppXamarin", MainLauncher = true, Icon = "@mipmap/icon")]
 	public class MainActivity : Activity
