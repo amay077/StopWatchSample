@@ -20,13 +20,10 @@ import rx.functions.Func1;
 
 public class MainViewModel implements Subscription {
 
+    // 簡易Messenger(EventBus のようなもの)
     public final Messenger messenger = new Messenger();
 
-    private final Context _appContext;
     private final StopWatchModel _stopWatch;
-    private StopWatchModel getStopWatch() {
-        return ((App)_appContext).getStopWatch();
-    }
 
     // ■ViewModel として公開するプロパティ
 
@@ -43,8 +40,7 @@ public class MainViewModel implements Subscription {
 
     // コンストラクタ
     public MainViewModel(Context appContext) {
-        _appContext = appContext;
-        _stopWatch = getStopWatch();
+        _stopWatch = ((App)appContext).getStopWatch();
 
         // StopWatchModel のプロパティをそのまま公開してるだけ
         isRunning = _stopWatch.isRunning;
