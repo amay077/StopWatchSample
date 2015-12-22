@@ -5,6 +5,7 @@
 への My Answer です。
 
 Android-Java版も作ってみました。
+
 Java版は RxJava, Xamarin版は Reactive Extensions と ReactiveProperty を使っています。
 それもあってか、 [@okazuki さんの](runceel/JXUG) に近い感じになったかも。
 
@@ -15,3 +16,5 @@ Java版は RxJava, Xamarin版は Reactive Extensions と ReactiveProperty を使
 1. Xamarin.iOS版 - [StopWatchAppXamarin/StopWatchApp.iOS](https://github.com/amay077/StopWatchSample/tree/master/StopWatchAppXamarin/StopWatchApp.iOS)
 
 Xamarin.Formsは使ってませんが、Android/iOSで Model,ViewModelをPCLで共通化([StopWatchApp.Core](https://github.com/amay077/StopWatchSample/tree/master/StopWatchAppXamarin/StopWatchApp.Core))しています
+
+[Issues](https://github.com/amay077/StopWatchSample/issues) でのツッコミ、お待ちしております。
