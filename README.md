@@ -2,7 +2,11 @@
 
 [JXUGC #9 Xamarin.Forms Mvvm 実装方法 Teachathon を開催しました - Xamarin 日本語情報](http://ytabuchi.hatenablog.com/entry/2015/12/20/012007)
 
-の My Answer です。
+への My Answer です。
+
+Android-Java版も作ってみました。
+Java版は RxJava, Xamarin版は Reactive Extensions と ReactiveProperty を使っています。
+それもあってか、 [@okazuki さんの](runceel/JXUG) に近い感じになったかも。
 
 ## プロジェクト構成
 
