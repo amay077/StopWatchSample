@@ -20,15 +20,15 @@ namespace StopWatchApp.Core.ViewModels
 		// ■ViewModel として公開するプロパティ
 
 		/// <summary> タイマー時間 </summary>
-		public ReactiveProperty<long> Time { get; }
+		public ReadOnlyReactiveProperty<long> Time { get; }
 		/// <summary> 実行中かどうか？ </summary>
-		public ReactiveProperty<bool> IsRunning { get; }
+        public ReadOnlyReactiveProperty<bool> IsRunning { get; }
 		/// <summary> 経過時間群 </summary>
-		public ReactiveProperty<IList<long>> Laps { get; }
+        public ReadOnlyReactiveProperty<IList<long>> Laps { get; }
 		/// <summary> 時間の表示フォーマット </summary>
-		public ReactiveProperty<string> TimeFormat { get; }
+        public ReadOnlyReactiveProperty<string> TimeFormat { get; }
 		/// <summary> ミリ秒を表示するか？ </summary>
-		public ReactiveProperty<bool> IsVisibleMillis { get; }
+        public ReadOnlyReactiveProperty<bool> IsVisibleMillis { get; }
 
 		// ■ViewModel として公開するコマンド
 
@@ -50,9 +50,9 @@ namespace StopWatchApp.Core.ViewModels
 			IsVisibleMillis = stopWatch.IsVisibleMillis;
 
 			// 表示用にthrottleで20ms毎に間引き。View側でやってもよいかも。
-			Time = stopWatch.Time.Throttle(TimeSpan.FromMilliseconds(20), Scheduler.Immediate).ToReactiveProperty();
+            Time = stopWatch.Time.Throttle(TimeSpan.FromMilliseconds(20), Scheduler.Immediate).ToReadOnlyReactiveProperty();
 			// ミリ秒以下表示有無に応じて、format書式文字列を切り替え（これはModelでやるべき？）
-			TimeFormat = stopWatch.IsVisibleMillis.Select(x => x ? @"mm\:ss\.fff" : @"mm\:ss").ToReactiveProperty();
+            TimeFormat = stopWatch.IsVisibleMillis.Select(x => x ? @"mm\:ss\.fff" : @"mm\:ss").ToReadOnlyReactiveProperty();
 
 			// STOP されたら、最速／最遅ラップを表示して、LapActivity へ遷移
 			IsRunning.Where(x => !x)

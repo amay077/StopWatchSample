@@ -12,15 +12,28 @@ namespace StopWatchApp.Core.Models
 	/// </summary>
 	public class StopWatchModel : IDisposable
 	{
+        // ストップウォッチの状態を更新＆通知するための ReactiveProperty 群(要は Subject)
+        private readonly ReactiveProperty<long> _time = new ReactiveProperty<long>(0L); // タイマー時間
+        private readonly ReactiveProperty<bool> _isRunning = new ReactiveProperty<bool>(false); // 実行中か？
+        private readonly ReactiveProperty<IList<long>> _laps = new ReactiveProperty<IList<long>>(new List<long>()); // 経過時間群
+        private readonly ReactiveProperty<bool> _isVisibleMillis = new ReactiveProperty<bool>(true); // ミリ秒表示するか？
+
 		// Model として公開するプロパティ
-		// ストップウォッチの状態を更新＆通知するための Subject 群
-		public ReactiveProperty<long> Time  { get; } = new ReactiveProperty<long>(0L); // タイマー時間
-		public ReactiveProperty<bool> IsRunning  { get; } = new ReactiveProperty<bool>(false); // 実行中か？
-		public ReactiveProperty<IList<long>> Laps  { get; } = new ReactiveProperty<IList<long>>(new List<long>()); // 経過時間群
-		public ReactiveProperty<bool> IsVisibleMillis  { get; } = new ReactiveProperty<bool>(true); // ミリ秒表示するか？
+        public ReadOnlyReactiveProperty<long> Time  { get; } // タイマー時間
+        public ReadOnlyReactiveProperty<bool> IsRunning  { get; } // 実行中か？
+        public ReadOnlyReactiveProperty<IList<long>> Laps  { get; } // 経過時間群
+        public ReadOnlyReactiveProperty<bool> IsVisibleMillis  { get; }// ミリ秒表示するか？
 
 		// タイマーの購読状況
 		private IDisposable _timerSubscription = null;
+
+        public StopWatchModel()
+        {
+            Time = _time.ToReadOnlyReactiveProperty();
+            IsRunning = _isRunning.ToReadOnlyReactiveProperty();
+            Laps = _laps.ToReadOnlyReactiveProperty();
+            IsVisibleMillis = _isVisibleMillis.ToReadOnlyReactiveProperty();
+        }
 
 		/// <summary>
 		/// 計測を開始または終了する(time プロパティの更新を開始する)
@@ -40,14 +53,14 @@ namespace StopWatchApp.Core.Models
 
 			// 開始時に Laps をクリア、実行中フラグをON
 			// RxJava の compose がないので「購読が開始された時」でないのが微妙…
-			Laps.Value = new List<long>();;
-			IsRunning.Value = true;
+			_laps.Value = new List<long>();;
+			_isRunning.Value = true;
 			var now = DateTime.Now;
 
 			_timerSubscription =
 				Observable.Interval(TimeSpan.FromMilliseconds(10), Scheduler.Default)
 					.Subscribe(time => {
-						Time.Value = Convert.ToInt64((DateTime.Now - now).TotalMilliseconds);
+						_time.Value = Convert.ToInt64((DateTime.Now - now).TotalMilliseconds);
 					}); // タイマー値を通知
 		}
 
@@ -58,7 +71,7 @@ namespace StopWatchApp.Core.Models
 			}
 
 			// 実行終了を通知
-			IsRunning.Value = false;
+			_isRunning.Value = false;
 		}
 
 		/// <summary>
@@ -77,7 +90,7 @@ namespace StopWatchApp.Core.Models
 
 			newLaps.Add(Time.Value - totalLap);
 
-			Laps.Value = newLaps;
+			_laps.Value = newLaps;
 		}
 
 		/// <summary>
@@ -114,7 +127,7 @@ namespace StopWatchApp.Core.Models
 		/// 小数点以下の表示有無を切り替える（isVisibleMillis プロパティを toggle する）
 		/// </summary>
 		public void ToggleVisibleMillis() {
-			IsVisibleMillis.Value = !IsVisibleMillis.Value;
+			_isVisibleMillis.Value = !_isVisibleMillis.Value;
 		}
 
 		#region IDisposable implementation
