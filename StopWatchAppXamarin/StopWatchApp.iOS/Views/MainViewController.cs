@@ -46,7 +46,7 @@ namespace StopWatchApp.iOS.Views
 				.SetCommand(_viewModel.CommandStartOrStop)
 				.AddTo(_subscriptionOnLoad);
 			buttonStartStop
-				.SetBindingEx(
+				.SetBinding(
 					(v, value) => v.SetTitle(value, UIControlState.Normal),
 					_viewModel.IsRunning.Select(x => x ? "STOP" : "START")
 					.ObserveOnUIDispatcher()
