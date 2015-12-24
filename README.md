@@ -7,7 +7,7 @@
 Android-Java版も作ってみました。
 
 Java版は RxJava, Xamarin版は Reactive Extensions と ReactiveProperty を使っています。
-それもあってか、 [@okazuki さんの](runceel/JXUG) に近い感じになったかも。
+それもあってか、 [@okazuki さんの](https://github.com/runceel/JXUG) に近い感じになったかも。
 
 ## プロジェクト構成
 
