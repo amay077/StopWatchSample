@@ -1,6 +1,7 @@
 package com.amay077.stopwatchapp.views;
 
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.amay077.stopwatchapp.R;
+import com.amay077.stopwatchapp.databinding.ActivityMainBinding;
 import com.amay077.stopwatchapp.frameworks.binders.ArrayAdapterBinder;
 import com.amay077.stopwatchapp.frameworks.binders.ButtonBinder;
 import com.amay077.stopwatchapp.frameworks.binders.SwitchBinder;
@@ -44,26 +46,26 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        final ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         _viewModel = new MainViewModel(this.getApplicationContext());
+        binding.setViewModel(_viewModel);
 
-        setContentView(R.layout.activity_main);
-
-        // フォーマットされた時間を表す Observable（time と timeFormat のどちらかが変更されたら更新）
-        final Observable<String> formattedTime = Observable.combineLatest(
-                _viewModel.time,
-                _viewModel.timeFormat, new Func2<Long, String, String>() {
-            @Override
-            public String call(Long time, String format) {
-                final SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
-                return sdf.format(new Date(time));
-            }
-        });
-
-        // TextView(textTime) のバインド
-        _subscriptionOnCreate.add(new TextViewBinder((TextView) findViewById(R.id.textTime))
-            .toTextOneWay(formattedTime) // time,timeFormat プロパティを .text へバインド
-        );
+//        // フォーマットされた時間を表す Observable（time と timeFormat のどちらかが変更されたら更新）
+//        final Observable<String> formattedTime = Observable.combineLatest(
+//                _viewModel.time,
+//                _viewModel.timeFormat, new Func2<Long, String, String>() {
+//            @Override
+//            public String call(Long time, String format) {
+//                final SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
+//                return sdf.format(new Date(time));
+//            }
+//        });
+//
+//        // TextView(textTime) のバインド
+//        _subscriptionOnCreate.add(new TextViewBinder((TextView) findViewById(R.id.textTime))
+//            .toTextOneWay(formattedTime) // time,timeFormat プロパティを .text へバインド
+//        );
 
         // Button(buttonStartStop) のバインド
         _subscriptionOnCreate.add(new ButtonBinder((Button) findViewById(R.id.buttonStartStop))
