@@ -1,8 +1,11 @@
 package com.amay077.stopwatchapp.models;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -10,6 +13,7 @@ import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import rx.subjects.BehaviorSubject;
 import rx.subjects.SerializedSubject;
@@ -37,6 +41,52 @@ public class StopWatchModel implements Subscription {
     public final Observable<Boolean> isRunning = _isRunning;
     public final Observable<List<Long>> laps = _laps;
     public final Observable<Boolean> isVisibleMillis = _isVisibleMillis;
+
+    public StopWatchModel() {
+
+    }
+
+    /**
+     * フォーマットされた時間を表す Observable（timeObservable と isVisibleMillis のどちらかが変更されたら更新）
+     */
+    public Observable<String> formatTimeAsObservable(Observable<Long> timeObservable) {
+        return Observable.combineLatest(
+                timeObservable,
+                isVisibleMillis, new Func2<Long, Boolean, String>() {
+                    @Override
+                    public String call(Long time, Boolean isVisibleMillis) {
+                        final String format = getTimeFormat(isVisibleMillis);
+                        final SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
+                        return sdf.format(new Date(time));
+                    }
+                });
+    }
+
+    /**
+     * フォーマットされた経過時間群を表す Observable（timesObservable と isVisibleMillis のどちらかが変更されたら更新）
+     */
+    public Observable<List<String>> formatTimesAsObservable(Observable<List<Long>> timesObservable) {
+        return Observable.combineLatest(
+                timesObservable,
+                isVisibleMillis, new Func2<List<Long>, Boolean, List<String>>() {
+                    @Override
+                    public List<String> call(List<Long> laps, Boolean isVisibleMillis) {
+                        final String format = getTimeFormat(isVisibleMillis);
+                        final SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
+
+                        final List<String> formattedLaps = new ArrayList<>();
+                        for (int i = 0; i < laps.size(); i++) {
+                            formattedLaps.add((i+1) + ".  " + sdf.format(new Date(laps.get(i))));
+                        }
+
+                        return formattedLaps;
+                    }
+                });
+    }
+
+    private String getTimeFormat(boolean isVisibleMillis) {
+        return isVisibleMillis ? "mm:ss.SSS" : "mm:ss";
+    }
 
     /**
      * 計測を開始または終了する(time プロパティの更新を開始する)

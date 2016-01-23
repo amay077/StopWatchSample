@@ -51,67 +51,12 @@ public class MainActivity extends AppCompatActivity {
         _viewModel = new MainViewModel(this.getApplicationContext());
         binding.setViewModel(_viewModel);
 
-//        // フォーマットされた時間を表す Observable（time と timeFormat のどちらかが変更されたら更新）
-//        final Observable<String> formattedTime = Observable.combineLatest(
-//                _viewModel.time,
-//                _viewModel.timeFormat, new Func2<Long, String, String>() {
-//            @Override
-//            public String call(Long time, String format) {
-//                final SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
-//                return sdf.format(new Date(time));
-//            }
-//        });
-//
-//        // TextView(textTime) のバインド
-//        _subscriptionOnCreate.add(new TextViewBinder((TextView) findViewById(R.id.textTime))
-//            .toTextOneWay(formattedTime) // time,timeFormat プロパティを .text へバインド
-//        );
-
-        // Button(buttonStartStop) のバインド
-        _subscriptionOnCreate.add(new ButtonBinder((Button) findViewById(R.id.buttonStartStop))
-            .toClickCommand(_viewModel.commandStartOrStop) // コマンド(commandStartOrStop) を Clickイベントへバインド
-            .toTextOneWay(_viewModel.isRunning.map(new Func1<Boolean, String>() { // isRunning プロパティを .text へバインド
-                @Override
-                public String call(Boolean isRunning) {
-                    return isRunning ? "STOP" : "START"; // 状態に応じて値(ラベル)を変換
-                }
-            }))
-        );
-
-        // Button(buttonLap) のバインド
-        _subscriptionOnCreate.add(new ButtonBinder((Button)findViewById(R.id.buttonLap))
-            .toClickCommand(_viewModel.commandLap) // コマンド(commandLap) を Clickイベントへバインド
-        );
-
-        // Switch(switchVisibleMillis) のバインド
-        _subscriptionOnCreate.add(new SwitchBinder((Switch) findViewById(R.id.switchVisibleMillis))
-            .toChecked(_viewModel.isVisibleMillis) // isVisibleMillis プロパティを .checked へバインド
-            .toClickCommand(_viewModel.commandToggleVisibleMillis) // コマンド(commandToggleVisibleMillis) を Clickイベントへバインド
-        );
-
-        // フォーマットされた経過時間群を表す Observable（time と timeFormat のどちらかが変更されたら更新）
-        final Observable<List<String>> formattedLaps = Observable.combineLatest(
-            _viewModel.laps,
-            _viewModel.timeFormat, new Func2<List<Long>, String, List<String>>() {
-                @Override
-                public List<String> call(List<Long> laps, String format) {
-                    final SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
-
-                    final List<String> formattedLaps = new ArrayList<>();
-                    for (int i = 0; i < laps.size(); i++) {
-                        formattedLaps.add((i+1) + ".  " + sdf.format(new Date(laps.get(i))));
-                    }
-
-                    return formattedLaps;
-                }
-            });
-
         // ListView(listLaps, ArrayAdapter) のバインド
         final ListView listLaps = (ListView)findViewById(R.id.listLaps);
         final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         listLaps.setAdapter(adapter);
         _subscriptionOnCreate.add(new ArrayAdapterBinder(adapter)
-                .toItems(formattedLaps) // laps プロパティを 変換して .items へバインド
+                .toItems(_viewModel.formattedLaps) // laps プロパティを 変換して .items へバインド
         );
 
         // ■ViewModel からの Message の受信

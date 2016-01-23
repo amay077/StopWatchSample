@@ -3,6 +3,7 @@ package com.amay077.stopwatchapp.viewmodel;
 import android.content.Context;
 import android.databinding.ObservableField;
 import android.databinding.ObservableLong;
+import android.view.View;
 
 import com.amay077.stopwatchapp.App;
 import com.amay077.stopwatchapp.frameworks.Command;
@@ -23,6 +24,7 @@ import rx.Subscription;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
+import rx.subscriptions.CompositeSubscription;
 
 public class MainViewModel implements Subscription {
 
@@ -31,124 +33,107 @@ public class MainViewModel implements Subscription {
 
     private final StopWatchModel _stopWatch;
 
+    private final CompositeSubscription _subscriptions = new CompositeSubscription();
+
     // ■ViewModel として公開するプロパティ
 
     /** タイマー時間 */
     public final ObservableField<String> formattedTime;
+    /** タイマー時間 */
+    public final ObservableField<String> runButtonTitle;
     /** 実行中かどうか？ */
-    public final Observable<Boolean> isRunning;
+    public final ObservableField<Boolean> isRunning;
     /** 経過時間群 */
-    public final Observable<List<Long>> laps;
-    /** 時間の表示フォーマット */
-    public final Observable<String> timeFormat;
+    public final Observable<List<String>> formattedLaps;
     /** ミリ秒を表示するか？ */
-    public final Observable<Boolean> isVisibleMillis;
+    public final ObservableField<Boolean> isVisibleMillis;
 
     // コンストラクタ
     public MainViewModel(Context appContext) {
         _stopWatch = ((App)appContext).getStopWatch();
 
         // StopWatchModel のプロパティをそのまま公開してるだけ
-        isRunning = _stopWatch.isRunning;
-        laps = _stopWatch.laps;
-        isVisibleMillis = _stopWatch.isVisibleMillis;
+        isRunning = toObservableField(_stopWatch.isRunning, _subscriptions);
+        formattedLaps = _stopWatch.formatTimesAsObservable(_stopWatch.laps);
+        isVisibleMillis = toObservableField(_stopWatch.isVisibleMillis, _subscriptions);
 
-        // 表示用にthrottleで10ms毎に間引き。View側でやってもよいかも。
-        formattedTime = new ObservableField<String>("");
-
-        // ミリ秒以下表示有無に応じて、format書式文字列を切り替え（これはModelでやるべき？）
-        timeFormat = _stopWatch.isVisibleMillis.map(new Func1<Boolean, String>() {
+        runButtonTitle = toObservableField(_stopWatch.isRunning.map(new Func1<Boolean, String>() {
             @Override
-            public String call(Boolean isVisibleMillis) {
-                return isVisibleMillis ? "mm:ss.SSS" : "mm:ss";
+            public String call(Boolean isRunning) {
+                return isRunning ? "STOP" : "START";
             }
-        });
+        }), _subscriptions);
 
         // フォーマットされた時間を表す Observable（time と timeFormat のどちらかが変更されたら更新）
-        Observable.combineLatest(
-                _stopWatch.time.throttleFirst(10, TimeUnit.MILLISECONDS),
-                timeFormat, new Func2<Long, String, String>() {
-                    @Override
-                    public String call(Long time, String format) {
-                        final SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
-                        return sdf.format(new Date(time));
-                    }
-                }).subscribe(new Action1<String>() {
-            @Override
-            public void call(String t) {
-                formattedTime.set(t);
-            }
-        });
+        // 表示用にthrottleで10ms毎に間引き。View側でやってもよいかも。
+        formattedTime = toObservableField(_stopWatch.formatTimeAsObservable(_stopWatch.time), _subscriptions);
 
         // STOP されたら、最速／最遅ラップを表示して、LapActivity へ遷移
-        isRunning.filter(new Func1<Boolean, Boolean>() {
-            @Override
-            public Boolean call(Boolean isRunning) {
-                return !isRunning;
-            }
-        })
-        .subscribe(new Action1<Boolean>() {
-            @Override
-            public void call(Boolean notUse) {
-                // Toast を表示させる
-                messenger.send(new ShowToastMessages(
-                        "最速ラップ:" + _stopWatch.getFastestLap() + // FIXME 時間がformatされてない
-                        ", 最遅ラップ:" + _stopWatch.getWorstLap()));
+        _subscriptions.add(
+                _stopWatch.isRunning.filter(new Func1<Boolean, Boolean>() {
+                    @Override
+                    public Boolean call(Boolean isRunning) {
+                        return !isRunning;
+                    }
+                })
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean notUse) {
+                        // Toast を表示させる
+                        messenger.send(new ShowToastMessages(
+                                "最速ラップ:" + _stopWatch.getFastestLap() + // FIXME 時間がformatされてない
+                                        ", 最遅ラップ:" + _stopWatch.getWorstLap()));
 
-                // LapActivity へ遷移させる
-                messenger.send(new StartActivityMessage(LapActivity.class)); // ホントは LapViewModel を指定して画面遷移すべき
-            }
-        });
+                        // LapActivity へ遷移させる
+                        messenger.send(new StartActivityMessage(LapActivity.class)); // ホントは LapViewModel を指定して画面遷移すべき
+                    }
+                }));;
     }
 
     // ■ViewModel として公開するコマンド
 
     /** 開始 or 終了 */
-    public final Command commandStartOrStop = new Command() {
-        @Override
-        public Observable<Boolean> canExecuteObservable() {
-            return Observable.just(true); // いつでも実行可能
-        }
-
-        @Override
-        public void execute() {
-            _stopWatch.startOrStop();
-        }
-    };
+    public void onClickStartOrStop(View view) {
+        _stopWatch.startOrStop();
+    }
 
     /** 経過時間の記録 */
-    public final Command commandLap = new Command() {
-        @Override
-        public Observable<Boolean> canExecuteObservable() {
-            return isRunning; // 実行中のみ記録可能
-        }
-
-        @Override
-        public void execute() {
-            _stopWatch.lap();
-        }
-    };
+    public void onClickLap(View view) {
+        _stopWatch.lap();
+    }
 
     /** ミリ秒以下表示の切り替え */
-    public final Command commandToggleVisibleMillis = new Command() {
-        @Override
-        public Observable<Boolean> canExecuteObservable() {
-            return Observable.just(true); // いつでも実行可能
-        }
-
-        @Override
-        public void execute()  {
-            _stopWatch.toggleVisibleMillis();
-        }
-    };
+    public void onClickToggleVisibleMillis(View view) {
+        _stopWatch.toggleVisibleMillis();
+    }
 
     @Override
     public void unsubscribe() {
         messenger.unsubscribe();
+        _subscriptions.unsubscribe();
     }
 
     @Override
     public boolean isUnsubscribed() {
         return messenger.isUnsubscribed();
+    }
+
+    /**
+     * rx.Observable から ObservableField への変換をおこなう
+     */
+    private <T> ObservableField<T> toObservableField(Observable<T> source, CompositeSubscription subscriptions) {
+        final ObservableField<T> field = new ObservableField<T>();
+
+        subscriptions.add(
+                // TODO onError も拾ったほうがいい
+                source.subscribe(new Action1<T>() {
+                    @Override
+                    public void call(T x) {
+                        field.set(x);
+                    }
+                })
+        );
+
+        return field;
     }
 }

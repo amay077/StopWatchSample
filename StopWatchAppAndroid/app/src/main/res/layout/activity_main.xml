@@ -24,16 +24,21 @@
 
         <Button
             android:id="@+id/buttonStartStop"
-            android:text="Start/Stop"
+            android:text="@{viewModel.runButtonTitle}"
+            android:onClick="@{viewModel.onClickStartOrStop}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <Button
             android:id="@+id/buttonLap"
             android:text="Lap"
+            android:enabled="@{viewModel.isRunning}"
+            android:onClick="@{viewModel.onClickLap}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <Switch
             android:id="@+id/switchVisibleMillis"
+            android:checked="@{viewModel.isVisibleMillis}"
+            android:onClick="@{viewModel.onClickToggleVisibleMillis}"
             android:text="小数点以下を表示"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
