@@ -75,11 +75,11 @@ public class StopWatchModel implements Subscription {
                         final SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
 
                         final List<String> formattedLaps = new ArrayList<>();
-                        for (int i = 0; i < laps.size(); i++) {
-                            formattedLaps.add((i+1) + ".  " + sdf.format(new Date(laps.get(i))));
+                        for (Long lap : laps) {
+                            formattedLaps.add(sdf.format(new Date(lap)));
                         }
 
-                        return formattedLaps;
+                        return Collections.unmodifiableList(formattedLaps);
                     }
                 });
     }

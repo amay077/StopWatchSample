@@ -1,47 +1,33 @@
-package com.amay077.stopwatchapp.views;
+package com.amay077.stopwatchapp.views.activities;
 
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.databinding.Observable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Switch;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.amay077.stopwatchapp.R;
 import com.amay077.stopwatchapp.databinding.ActivityMainBinding;
 import com.amay077.stopwatchapp.frameworks.binders.ArrayAdapterBinder;
-import com.amay077.stopwatchapp.frameworks.binders.ButtonBinder;
-import com.amay077.stopwatchapp.frameworks.binders.SwitchBinder;
-import com.amay077.stopwatchapp.frameworks.binders.TextViewBinder;
 import com.amay077.stopwatchapp.frameworks.messengers.Message;
 import com.amay077.stopwatchapp.frameworks.messengers.ShowToastMessages;
 import com.amay077.stopwatchapp.frameworks.messengers.StartActivityMessage;
 import com.amay077.stopwatchapp.viewmodel.MainViewModel;
+import com.amay077.stopwatchapp.views.adapters.LapAdapter;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action;
 import rx.functions.Action0;
 import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.functions.Func2;
 import rx.subscriptions.CompositeSubscription;
 
 public class MainActivity extends AppCompatActivity {
 
     private /* final */  MainViewModel _viewModel;
 
-    private final CompositeSubscription _subscriptionOnCreate = new CompositeSubscription();
+    private Action0 _removeCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,13 +37,24 @@ public class MainActivity extends AppCompatActivity {
         _viewModel = new MainViewModel(this.getApplicationContext());
         binding.setViewModel(_viewModel);
 
-        // ListView(listLaps, ArrayAdapter) のバインド
-        final ListView listLaps = (ListView)findViewById(R.id.listLaps);
-        final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
-        listLaps.setAdapter(adapter);
-        _subscriptionOnCreate.add(new ArrayAdapterBinder(adapter)
-                .toItems(_viewModel.formattedLaps) // laps プロパティを 変換して .items へバインド
-        );
+        final LapAdapter lapAdapter = new LapAdapter(this);
+        binding.listLaps.setAdapter(lapAdapter);
+
+        final Observable.OnPropertyChangedCallback formattedLapsChangedHandler = new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable sender, int propertyId) {
+                lapAdapter.clear();
+                lapAdapter.addAll(_viewModel.formattedLaps.get());
+            }
+        };
+        _viewModel.formattedLaps.addOnPropertyChangedCallback(formattedLapsChangedHandler);
+
+        _removeCallback = new Action0() {
+            @Override
+            public void call() {
+                _viewModel.formattedLaps.removeOnPropertyChangedCallback(formattedLapsChangedHandler);
+            }
+        };
 
         // ■ViewModel からの Message の受信
 
@@ -68,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        final StartActivityMessage m = (StartActivityMessage)message;
+                        final StartActivityMessage m = (StartActivityMessage) message;
                         Intent intent = new Intent(MainActivity.this, m.activityClass);
                         MainActivity.this.startActivity(intent);
                     }
@@ -83,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        final ShowToastMessages m = (ShowToastMessages)message;
+                        final ShowToastMessages m = (ShowToastMessages) message;
                         Toast.makeText(MainActivity.this, m.text, Toast.LENGTH_LONG).show();
                     }
                 });
@@ -94,9 +91,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        // unsubscribe しないと Activity がリークするよ
-        _subscriptionOnCreate.unsubscribe();
-        _subscriptionOnCreate.clear();
+
+        if (_removeCallback != null) {
+            _removeCallback.call();
+        }
 
         _viewModel.unsubscribe();
         super.onDestroy();

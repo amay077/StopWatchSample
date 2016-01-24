@@ -1,19 +1,24 @@
 package com.amay077.stopwatchapp.viewmodel;
 
 import android.content.Context;
+import android.databinding.ObservableField;
 
 import com.amay077.stopwatchapp.App;
 import com.amay077.stopwatchapp.models.StopWatchModel;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import rx.Observable;
+import rx.Subscription;
 import rx.functions.Func1;
+import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created by hrnv on 2015/12/20.
  */
-public class LapViewModel {
+public class LapViewModel implements Subscription {
     private final Context _appContext;
     private final StopWatchModel _stopWatch;
 
@@ -21,22 +26,39 @@ public class LapViewModel {
         return ((App)_appContext).getStopWatch();
     }
 
+
     /** 経過時間群 */
-    public final Observable<List<Long>> laps;
-    /** 時間の表示フォーマット */
-    public final Observable<String> timeFormat;
+    public final ObservableField<List<LapItem>> formattedLaps;
+
+    private final CompositeSubscription _subscriptions = new CompositeSubscription();
 
     public LapViewModel(Context appContext) {
         _appContext = appContext;
         _stopWatch = getStopWatch();
 
-        laps = _stopWatch.laps;
-        // ミリ秒以下表示有無に応じて、format書式文字列を切り替え（これはModelでやるべき？）
-        timeFormat = _stopWatch.isVisibleMillis.map(new Func1<Boolean, String>() {
-            @Override
-            public String call(Boolean isVisibleMillis) {
-                return isVisibleMillis ? "mm:ss.SSS" : "mm:ss";
-            }
-        });
+        formattedLaps = ObservableUtil.toObservableField(_stopWatch.formatTimesAsObservable(_stopWatch.laps)
+                .map(new Func1<List<String>, List<LapItem>>() {
+                    @Override
+                    public List<LapItem> call(List<String> fLaps) {
+                        final List<LapItem> lapItems = new ArrayList<>();
+                        int i = 1;
+                        for (String lap : fLaps) {
+                            lapItems.add(new LapItem(String.valueOf(i), lap));
+                            i++;
+                        }
+
+                        return Collections.unmodifiableList(lapItems);
+                    }
+                }), _subscriptions);
+    }
+
+    @Override
+    public void unsubscribe() {
+        _subscriptions.unsubscribe();
+    }
+
+    @Override
+    public boolean isUnsubscribed() {
+        return _subscriptions.isUnsubscribed();
     }
 }
