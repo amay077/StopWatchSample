@@ -1,30 +1,19 @@
 package com.amay077.stopwatchapp.views.activities;
 
 import android.databinding.DataBindingUtil;
-import android.databinding.ViewDataBinding;
+import android.databinding.ObservableField;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import com.amay077.stopwatchapp.R;
 import com.amay077.stopwatchapp.databinding.ActivityLapBinding;
-import com.amay077.stopwatchapp.databinding.ActivityMainBinding;
-import com.amay077.stopwatchapp.frameworks.binders.ArrayAdapterBinder;
+import com.amay077.stopwatchapp.viewmodel.LapItem;
 import com.amay077.stopwatchapp.viewmodel.LapViewModel;
-import com.amay077.stopwatchapp.viewmodel.MainViewModel;
 import com.amay077.stopwatchapp.views.adapters.LapAdapter;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
-import rx.Observable;
 import rx.functions.Action0;
-import rx.functions.Func2;
-import rx.subscriptions.CompositeSubscription;
 
 public class LapActivity extends AppCompatActivity {
 
@@ -43,20 +32,27 @@ public class LapActivity extends AppCompatActivity {
         final LapAdapter lapAdapter = new LapAdapter(this);
         binding.listLaps.setAdapter(lapAdapter);
 
+        // TODO オレオレBindingなのが気に入らない
+        bindAdapter(lapAdapter, _viewModel.formattedLaps);
+    }
+
+    private void bindAdapter(final LapAdapter adapter, final ObservableField<List<LapItem>> observableField) {
         final android.databinding.Observable.OnPropertyChangedCallback formattedLapsChangedHandler =
                 new android.databinding.Observable.OnPropertyChangedCallback() {
-            @Override
-            public void onPropertyChanged(android.databinding.Observable sender, int propertyId) {
-                lapAdapter.clear();
-                lapAdapter.addAll(_viewModel.formattedLaps.get());
-            }
-        };
-        _viewModel.formattedLaps.addOnPropertyChangedCallback(formattedLapsChangedHandler);
+                    @Override
+                    public void onPropertyChanged(android.databinding.Observable sender, int propertyId) {
+                        adapter.clear();
+                        adapter.addAll(_viewModel.formattedLaps.get());
+                    }
+                };
+        observableField.addOnPropertyChangedCallback(formattedLapsChangedHandler);
+        adapter.clear();
+        adapter.addAll(observableField.get());
 
         _removeCallback = new Action0() {
             @Override
             public void call() {
-                _viewModel.formattedLaps.removeOnPropertyChangedCallback(formattedLapsChangedHandler);
+                observableField.removeOnPropertyChangedCallback(formattedLapsChangedHandler);
             }
         };
     }

@@ -1,34 +1,39 @@
 package com.amay077.stopwatchapp.frameworks.messengers;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action0;
 import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.subjects.PublishSubject;
+import rx.subjects.SerializedSubject;
+import rx.subjects.Subject;
 
-public class Messenger implements Subscription {
-    private final Map<String, Action1<Message>> _registerMap = new HashMap<>();
+public class Messenger {
+    private final Subject<Message, Message> _bus =
+            new SerializedSubject<Message, Message >(PublishSubject.<Message>create());
 
     public void send(Message message) {
-        final String className = message.getClass().getName();
-        if (_registerMap.containsKey(className)) {
-            final Action1 handler = _registerMap.get(className);
-            handler.call(message);
-        }
+        _bus.onNext(message);
     }
 
-    public void register(String messageClassName, Action1<Message> action) {
-        _registerMap.put(messageClassName, action);
-    }
-
-    @Override
-    public void unsubscribe() {
-        _registerMap.clear();
-    }
-
-    @Override
-    public boolean isUnsubscribed() {
-        return _registerMap.size() == 0;
+    public <T extends Message> Observable<T> register(final Class<? extends T> messengerClass) {
+        return _bus
+                .filter(new Func1<Message, Boolean>() {
+                    @Override
+                    public Boolean call(Message message) {
+                        return messengerClass.getName() == message.getClass().getName(); // messengerClass.isInstance(message)
+                    }
+                })
+                .map(new Func1<Message, T>() {
+                    @Override
+                    public T call(Message message) {
+                        return (T)message;
+                    }
+                });
     }
 }

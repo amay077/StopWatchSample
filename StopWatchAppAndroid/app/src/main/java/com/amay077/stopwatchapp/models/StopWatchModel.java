@@ -42,12 +42,16 @@ public class StopWatchModel implements Subscription {
     public final Observable<List<Long>> laps = _laps;
     public final Observable<Boolean> isVisibleMillis = _isVisibleMillis;
 
+    private final AtomicLong _startTime = new AtomicLong(0L);
+
     public StopWatchModel() {
 
     }
 
     /**
      * フォーマットされた時間を表す Observable（timeObservable と isVisibleMillis のどちらかが変更されたら更新）
+     *
+     * 拡張メソッドが使えたらなあ。。。
      */
     public Observable<String> formatTimeAsObservable(Observable<Long> timeObservable) {
         return Observable.combineLatest(
@@ -64,6 +68,8 @@ public class StopWatchModel implements Subscription {
 
     /**
      * フォーマットされた経過時間群を表す Observable（timesObservable と isVisibleMillis のどちらかが変更されたら更新）
+     *
+     * 拡張メソッドが使えたらなあ。。。
      */
     public Observable<List<String>> formatTimesAsObservable(Observable<List<Long>> timesObservable) {
         return Observable.combineLatest(
@@ -104,8 +110,6 @@ public class StopWatchModel implements Subscription {
             stop();
         }
 
-        final AtomicLong startTime = new AtomicLong();
-
         _timerSubscription =
                 Observable.interval(1, TimeUnit.MILLISECONDS, Schedulers.newThread())
                         .compose(new Observable.Transformer<Long, Long>() {
@@ -114,7 +118,7 @@ public class StopWatchModel implements Subscription {
                                 // 開始時に Laps をクリア、実行中フラグをON
                                 _laps.onNext(Collections.<Long>emptyList());
                                 _isRunningSerialized.onNext(true);
-                                startTime.set(System.currentTimeMillis());
+                                _startTime.set(System.currentTimeMillis());
                                 return x;
                             }
                         })
@@ -122,12 +126,15 @@ public class StopWatchModel implements Subscription {
                             @Override
                             public void call(Long notUse) {
                                 // タイマー値を通知
-                                _timeSerialized.onNext(System.currentTimeMillis() - startTime.get());
+                                _timeSerialized.onNext(System.currentTimeMillis() - _startTime.get());
                             }
                         });
     }
 
     private void stop() {
+
+        _timeSerialized.onNext(System.currentTimeMillis() - _startTime.get());
+
         if (_timerSubscription != null) {
             _timerSubscription.unsubscribe();
             _timerSubscription = null;
@@ -151,7 +158,8 @@ public class StopWatchModel implements Subscription {
             totalLap += lap;
         }
 
-        newLaps.add(_time.getValue() - totalLap);
+        final long lap = System.currentTimeMillis() - _startTime.get();
+        newLaps.add(lap - totalLap);
 
         _laps.onNext(Collections.unmodifiableList(newLaps));
     }

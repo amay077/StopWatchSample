@@ -118,12 +118,11 @@ public class MainViewModel implements Subscription {
 
     @Override
     public void unsubscribe() {
-        messenger.unsubscribe();
         _subscriptions.unsubscribe();
     }
 
     @Override
     public boolean isUnsubscribed() {
-        return messenger.isUnsubscribed();
+        return _subscriptions.isUnsubscribed();
     }
 }

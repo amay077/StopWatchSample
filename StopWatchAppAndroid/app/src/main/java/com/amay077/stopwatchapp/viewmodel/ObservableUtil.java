@@ -6,9 +6,6 @@ import rx.Observable;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 
-/**
- * Created by hrnv on 16/01/24.
- */
 public final class ObservableUtil {
     private ObservableUtil() {
     }
