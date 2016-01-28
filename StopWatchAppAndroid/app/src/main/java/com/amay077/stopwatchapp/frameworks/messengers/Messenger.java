@@ -21,14 +21,9 @@ public class Messenger {
         _bus.onNext(message);
     }
 
-    public <T extends Message> Observable<T> register(final Class<? extends T> messengerClass) {
+    public <T extends Message> Observable<T> register(final Class<? extends T> messageClazz) {
         return _bus
-                .filter(new Func1<Message, Boolean>() {
-                    @Override
-                    public Boolean call(Message message) {
-                        return messengerClass.getName() == message.getClass().getName(); // messengerClass.isInstance(message)
-                    }
-                })
+                .ofType(messageClazz)
                 .map(new Func1<Message, T>() {
                     @Override
                     public T call(Message message) {
