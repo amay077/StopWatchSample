@@ -3,6 +3,7 @@ package com.amay077.stopwatchapp.viewmodel;
 import android.content.Context;
 import android.databinding.ObservableField;
 
+import com.amay077.databinding.RxField;
 import com.amay077.stopwatchapp.App;
 import com.amay077.stopwatchapp.models.StopWatchModel;
 
@@ -36,7 +37,7 @@ public class LapViewModel implements Subscription {
         _appContext = appContext;
         _stopWatch = getStopWatch();
 
-        formattedLaps = ObservableUtil.toObservableField(_stopWatch.formatTimesAsObservable(_stopWatch.laps)
+        formattedLaps = new RxField<>(_stopWatch.formatTimesAsObservable(_stopWatch.laps)
                 .map(new Func1<List<String>, List<LapItem>>() {
                     @Override
                     public List<LapItem> call(List<String> fLaps) {
@@ -49,7 +50,7 @@ public class LapViewModel implements Subscription {
 
                         return Collections.unmodifiableList(lapItems);
                     }
-                }), _subscriptions);
+                }));
     }
 
     @Override

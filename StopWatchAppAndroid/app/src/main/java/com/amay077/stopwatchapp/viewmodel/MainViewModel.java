@@ -4,6 +4,7 @@ import android.content.Context;
 import android.databinding.ObservableField;
 import android.view.View;
 
+import com.amay077.databinding.RxField;
 import com.amay077.stopwatchapp.App;
 import com.amay077.stopwatchapp.frameworks.messengers.Messenger;
 import com.amay077.stopwatchapp.frameworks.messengers.ShowToastMessages;
@@ -15,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -48,8 +48,8 @@ public class MainViewModel implements Subscription {
         _stopWatch = ((App)appContext).getStopWatch();
 
         // StopWatchModel のプロパティをそのまま公開してるだけ
-        isRunning = ObservableUtil.toObservableField(_stopWatch.isRunning, _subscriptions);
-        formattedLaps = ObservableUtil.toObservableField(_stopWatch.formatTimesAsObservable(_stopWatch.laps)
+        isRunning = new RxField<>(_stopWatch.isRunning); // ObservableUtil.toObservableField(_stopWatch.isRunning, _subscriptions);
+        formattedLaps = new RxField<>(_stopWatch.formatTimesAsObservable(_stopWatch.laps)
                 .map(new Func1<List<String>, List<LapItem>>() {
                     @Override
                     public List<LapItem> call(List<String> fLaps) {
@@ -62,20 +62,20 @@ public class MainViewModel implements Subscription {
 
                         return Collections.unmodifiableList(lapItems);
                     }
-                }), _subscriptions);
+                }));
 
-        isVisibleMillis = ObservableUtil.toObservableField(_stopWatch.isVisibleMillis, _subscriptions);
+        isVisibleMillis = new RxField<>(_stopWatch.isVisibleMillis);
 
-        runButtonTitle = ObservableUtil.toObservableField(_stopWatch.isRunning.map(new Func1<Boolean, String>() {
+        runButtonTitle = new RxField<>(_stopWatch.isRunning.map(new Func1<Boolean, String>() {
             @Override
             public String call(Boolean isRunning) {
                 return isRunning ? "STOP" : "START";
             }
-        }), _subscriptions);
+        }));
 
         // フォーマットされた時間を表す Observable（time と timeFormat のどちらかが変更されたら更新）
         // 表示用にthrottleで10ms毎に間引き。View側でやってもよいかも。
-        formattedTime = ObservableUtil.toObservableField(_stopWatch.formatTimeAsObservable(_stopWatch.time), _subscriptions);
+        formattedTime = new RxField<>(_stopWatch.formatTimeAsObservable(_stopWatch.time));
 
         // STOP されたら、最速／最遅ラップを表示して、LapActivity へ遷移
         _subscriptions.add(
