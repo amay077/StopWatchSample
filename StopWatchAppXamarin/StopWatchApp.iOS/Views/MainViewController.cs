@@ -13,6 +13,7 @@ using System.Diagnostics;
 using StopWatchApp.Core.Frameworks.Messengers;
 using System.Linq;
 using Xamarin.Controls;
+using StopWatchApp.Core.Extensions;
 
 namespace StopWatchApp.iOS.Views
 {
@@ -33,12 +34,7 @@ namespace StopWatchApp.iOS.Views
 			_viewModel = new MainViewModel(UIApplication.SharedApplication.Delegate as IModelPool);
 
 			// UILabel(labelTime) のバインド
-			labelTime.SetBinding(v => v.Text, _viewModel.Time
-				.CombineLatest(
-					_viewModel.TimeFormat,
-					(t, f) => TimeSpan.FromMilliseconds(t).ToString(f))
-				.ObserveOnUIDispatcher()
-				.ToReactiveProperty())
+            labelTime.SetBinding(v => v.Text, _viewModel.FormattedTime.ObserveOnUIDispatcher().ToReactiveProperty())
 				.AddTo(_subscriptionOnLoad);
 
 			// UIButton(buttonStartStop) のバインド
@@ -71,20 +67,17 @@ namespace StopWatchApp.iOS.Views
 				.AddTo(_subscriptionOnLoad);
 
 
-			// ListView(listLaps, ArrayAdapter) のバインド
-			// フォーマットされた経過時間群を表す Observable（time と timeFormat のどちらかが変更されたら更新）
-			var formattedLaps = _viewModel.Laps.CombineLatest(
-				_viewModel.TimeFormat, 
-				(laps, f) => laps.Select((x, i) => $"{i+1}.  {TimeSpan.FromMilliseconds(x).ToString(f)}"))
-				.ToReactiveProperty();
-			tableLaps.SetBindingToSource(formattedLaps)
-				.AddTo(_subscriptionOnLoad);
+            // ListView(listLaps, ArrayAdapter) のバインド
+            // 番号付きのリストに変換
+            var numberedLaps = _viewModel.FormattedLaps;
+            tableLaps
+                .SetBindingToSource(numberedLaps)
+                .AddTo(_subscriptionOnLoad);
 
+            // ■ViewModel からの Message の受信
 
-			// ■ViewModel からの Message の受信
-
-			// 画面遷移のメッセージ受信
-			_viewModel.Messenger.Register(typeof(StartViewMessage).Name, message => InvokeOnMainThread(() => {
+            // 画面遷移のメッセージ受信
+            _viewModel.Messenger.Register(typeof(StartViewMessage).Name, message => InvokeOnMainThread(() => {
 				PerformSegue("goto_lap", this);
 			}));
 

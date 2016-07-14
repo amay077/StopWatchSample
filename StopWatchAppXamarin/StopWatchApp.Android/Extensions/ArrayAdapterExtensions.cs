@@ -8,7 +8,7 @@ namespace StopWatchApp.Android.Extensions
 {
 	public static class ArrayAdapterExtensions
 	{
-		public static IDisposable SetBinding(this ArrayAdapter self, ReactiveProperty<IEnumerable<string>> prop)
+		public static IDisposable SetBinding(this ArrayAdapter self, ReadOnlyReactiveProperty<IEnumerable<string>> prop)
 		{
 			return prop.ObserveOnUIDispatcher()
 				.Subscribe(items => {

@@ -12,7 +12,7 @@ namespace StopWatchApp.Android
 	public class App : Application, IModelPool
 	{
 		#region IModelPool implementation
-		public StopWatchModel StopWatch { get; } = new StopWatchModel();
+        public StopWatchModel StopWatch { get; private set; }
 		#endregion
 
 		public IDictionary<Type, Type> VmToActivityTypes { get; } = new Dictionary<Type, Type>() 
@@ -21,10 +21,15 @@ namespace StopWatchApp.Android
 			{ typeof(LapViewModel), typeof(LapActivity) }
 		};
 
-		public App(IntPtr javaReference, JniHandleOwnership transfer)
-			: base(javaReference, transfer)
-		{
-		}
+        public App(IntPtr handle, JniHandleOwnership transfer) : base(handle, transfer)
+        {
+        }
+
+        public override void OnCreate()
+        {
+            base.OnCreate();
+            this.StopWatch = new StopWatchModel();
+        }
 
 		public override void OnTerminate()
 		{

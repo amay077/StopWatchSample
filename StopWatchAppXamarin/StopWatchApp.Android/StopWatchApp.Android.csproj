@@ -57,13 +57,13 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="ReactiveProperty.DataAnnotations">
-      <HintPath>..\packages\ReactiveProperty.2.4.0\lib\MonoAndroid\ReactiveProperty.DataAnnotations.dll</HintPath>
+      <HintPath>..\packages\ReactiveProperty.2.8\lib\MonoAndroid\ReactiveProperty.DataAnnotations.dll</HintPath>
     </Reference>
     <Reference Include="ReactiveProperty">
-      <HintPath>..\packages\ReactiveProperty.2.4.0\lib\MonoAndroid\ReactiveProperty.dll</HintPath>
+      <HintPath>..\packages\ReactiveProperty.2.8\lib\MonoAndroid\ReactiveProperty.dll</HintPath>
     </Reference>
     <Reference Include="ReactiveProperty.Android">
-      <HintPath>..\packages\ReactiveProperty.2.4.0\lib\MonoAndroid\ReactiveProperty.Android.dll</HintPath>
+      <HintPath>..\packages\ReactiveProperty.2.8\lib\MonoAndroid\ReactiveProperty.Android.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

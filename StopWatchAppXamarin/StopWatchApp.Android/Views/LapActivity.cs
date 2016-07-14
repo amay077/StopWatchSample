@@ -13,6 +13,7 @@ using Reactive.Bindings;
 using Android.Widget;
 using Reactive.Bindings.Extensions;
 using StopWatchApp.Android.Extensions;
+using StopWatchApp.Core.Extensions;
 
 namespace StopWatchApp.Android.Views
 {
@@ -32,18 +33,15 @@ namespace StopWatchApp.Android.Views
 			// Set our view from the "main" layout resource
 			SetContentView (Resource.Layout.activity_lap);
 
-			// ListView(listLaps, ArrayAdapter) のバインド
-			// フォーマットされた経過時間群を表す Observable（time と timeFormat のどちらかが変更されたら更新）
-			var formattedLaps = _viewModel.Laps.CombineLatest(
-				_viewModel.TimeFormat, 
-				(laps, f) => laps.Select((x, i) => $"{i+1}.  {TimeSpan.FromMilliseconds(x).ToString(f)}"))
-				.ToReactiveProperty();
+            // ListView(listLaps, ArrayAdapter) のバインド
+            // 番号付きのリストに変換
+            var numberedLaps = _viewModel.FormattedLaps.ToNumberedLaps();
 
 			var listLaps = FindViewById<ListView>(Resource.Id.listLaps);
 			var listAdapter = new ArrayAdapter(this, global::Android.Resource.Layout.SimpleListItem1);
 			listLaps.Adapter = listAdapter;
 			listAdapter
-				.SetBinding(formattedLaps)
+				.SetBinding(numberedLaps)
 				.AddTo(_subscriptionOnCreate);
 		}
 

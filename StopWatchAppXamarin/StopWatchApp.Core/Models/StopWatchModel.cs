@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Linq;
+using System.Diagnostics;
 
 namespace StopWatchApp.Core.Models
 {
@@ -17,11 +18,12 @@ namespace StopWatchApp.Core.Models
         private readonly ReactiveProperty<bool> _isRunning = new ReactiveProperty<bool>(false); // 実行中か？
         private readonly ReactiveProperty<IList<long>> _laps = new ReactiveProperty<IList<long>>(new List<long>()); // 経過時間群
         private readonly ReactiveProperty<bool> _isVisibleMillis = new ReactiveProperty<bool>(true); // ミリ秒表示するか？
+        private readonly ReactiveProperty<string> _timeFormat;
 
-		// Model として公開するプロパティ
-        public ReadOnlyReactiveProperty<long> Time  { get; } // タイマー時間
+        // Model として公開するプロパティ
+        public ReadOnlyReactiveProperty<string> FormattedTime { get; } // フォーマットされたタイマー時間
         public ReadOnlyReactiveProperty<bool> IsRunning  { get; } // 実行中か？
-        public ReadOnlyReactiveProperty<IList<long>> Laps  { get; } // 経過時間群
+        public ReadOnlyReactiveProperty<IEnumerable<string>> FormattedLaps { get; } // フォーマットされた経過時間群
         public ReadOnlyReactiveProperty<bool> IsVisibleMillis  { get; }// ミリ秒表示するか？
 
 		// タイマーの購読状況
@@ -29,10 +31,22 @@ namespace StopWatchApp.Core.Models
 
         public StopWatchModel()
         {
-            Time = _time.ToReadOnlyReactiveProperty();
+            Debug.WriteLine("StopWatchModel ctor");
+
             IsRunning = _isRunning.ToReadOnlyReactiveProperty();
-            Laps = _laps.ToReadOnlyReactiveProperty();
             IsVisibleMillis = _isVisibleMillis.ToReadOnlyReactiveProperty();
+
+            _timeFormat = IsVisibleMillis
+                .Select(v => v ? @"mm\:ss\.fff" : @"mm\:ss")
+                .ToReactiveProperty();
+
+            FormattedTime = _time.CombineLatest(_timeFormat, (time, format) =>
+                    TimeSpan.FromMilliseconds(time).ToString(format))
+                .ToReadOnlyReactiveProperty();
+
+            FormattedLaps = _laps.CombineLatest(_timeFormat,
+                (laps, f) => laps.Select((x, i) => TimeSpan.FromMilliseconds(x).ToString(f)))
+                .ToReadOnlyReactiveProperty();
         }
 
 		/// <summary>
@@ -78,7 +92,7 @@ namespace StopWatchApp.Core.Models
 		/// 経過時間を記録する(経過時間を laps プロパティに追加する)
 		/// </summary>
 		public void Lap() {
-			var laps = Laps.Value;
+			var laps = _laps.Value;
 			var newLaps = new List<long>();
 
 			newLaps.AddRange(laps);
@@ -88,7 +102,7 @@ namespace StopWatchApp.Core.Models
 				totalLap += lap;
 			}
 
-			newLaps.Add(Time.Value - totalLap);
+			newLaps.Add(_time.Value - totalLap);
 
 			_laps.Value = newLaps;
 		}
@@ -96,14 +110,15 @@ namespace StopWatchApp.Core.Models
 		/// <summary>
 		/// 最速ラップを取得(返り値でなく、Observableなプロパティにした方がホントはよい)
 		/// </summary>
-		public long? FastestLap  {
+		public string FastestLap  {
 			get 
 			{
-				var laps = Laps.Value;
+				var laps = _laps.Value;
 				if (laps.Count == 0) {
-					return null; // nullを使うことを許したまえ
+                    return TimeSpan.FromMilliseconds(_time.Value).ToString(_timeFormat.Value);
 				} else {
-					return laps.Min(); // LINQ便利
+                    // LINQ便利
+                    return  TimeSpan.FromMilliseconds(laps.Min()).ToString(_timeFormat.Value); 
 				}
 			}
 		}
@@ -111,15 +126,16 @@ namespace StopWatchApp.Core.Models
 		/// <summary>
 		/// 最遅ラップを取得(返り値でなく、Observableなプロパティにした方がホントはよい) */
 		/// </summary>
-		public long? WorstLap  {
+		public string WorstLap  {
 			get 
 			{
-				var laps = Laps.Value;
+				var laps = _laps.Value;
 				if (laps.Count == 0) {
-					return null; // nullを使うことを許したまえ
-				} else {
-					return laps.Max(); // LINQ便利
-				}
+                    return TimeSpan.FromMilliseconds(_time.Value).ToString(_timeFormat.Value);
+                } else {
+                    // LINQ便利
+                    return TimeSpan.FromMilliseconds(laps.Max()).ToString(_timeFormat.Value);
+                }
 			}
 		}
 

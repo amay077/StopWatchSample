@@ -20,14 +20,12 @@ namespace StopWatchApp.Core.ViewModels
 		// ■ViewModel として公開するプロパティ
 
 		/// <summary> タイマー時間 </summary>
-		public ReadOnlyReactiveProperty<long> Time { get; }
+		public ReadOnlyReactiveProperty<string> FormattedTime { get; }
 		/// <summary> 実行中かどうか？ </summary>
         public ReadOnlyReactiveProperty<bool> IsRunning { get; }
-		/// <summary> 経過時間群 </summary>
-        public ReadOnlyReactiveProperty<IList<long>> Laps { get; }
-		/// <summary> 時間の表示フォーマット </summary>
-        public ReadOnlyReactiveProperty<string> TimeFormat { get; }
-		/// <summary> ミリ秒を表示するか？ </summary>
+        /// <summary> フォーマットされた経過時間群 </summary>
+        public ReadOnlyReactiveProperty<IEnumerable<string>> FormattedLaps { get; }
+        /// <summary> ミリ秒を表示するか？ </summary>
         public ReadOnlyReactiveProperty<bool> IsVisibleMillis { get; }
 
 		// ■ViewModel として公開するコマンド
@@ -46,13 +44,13 @@ namespace StopWatchApp.Core.ViewModels
 			// ■プロパティの実装
 			// StopWatchModel の各プロパティをそのまま公開してるだけ
 			IsRunning = stopWatch.IsRunning;
-			Laps = stopWatch.Laps;
+            FormattedLaps = stopWatch.FormattedLaps;
 			IsVisibleMillis = stopWatch.IsVisibleMillis;
 
 			// 表示用にthrottleで20ms毎に間引き。View側でやってもよいかも。
-            Time = stopWatch.Time.Throttle(TimeSpan.FromMilliseconds(20), Scheduler.Immediate).ToReadOnlyReactiveProperty();
-			// ミリ秒以下表示有無に応じて、format書式文字列を切り替え（これはModelでやるべき？）
-            TimeFormat = stopWatch.IsVisibleMillis.Select(x => x ? @"mm\:ss\.fff" : @"mm\:ss").ToReadOnlyReactiveProperty();
+            FormattedTime = stopWatch.FormattedTime
+                .Throttle(TimeSpan.FromMilliseconds(20), Scheduler.Immediate)
+                .ToReadOnlyReactiveProperty();
 
 			// STOP されたら、最速／最遅ラップを表示して、LapActivity へ遷移
 			IsRunning.Where(x => !x)
@@ -60,7 +58,7 @@ namespace StopWatchApp.Core.ViewModels
 				{
 					// Toast を表示させる
 					Messenger.Send(new ShowToastMessage(
-							$"最速ラップ:{stopWatch.FastestLap}, 最遅ラップ:{stopWatch.WorstLap}")); // FIXME 時間がformatされてない
+							$"最速ラップ:{stopWatch.FastestLap}, 最遅ラップ:{stopWatch.WorstLap}")); 
 
 					// LapActivity へ遷移させる
 					Messenger.Send(new StartViewMessage(typeof(LapViewModel))); // ホントは LapViewModel を指定して画面遷移すべき

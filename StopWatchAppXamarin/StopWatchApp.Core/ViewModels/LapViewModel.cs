@@ -10,7 +10,7 @@ namespace StopWatchApp.Core.ViewModels
 	public class LapViewModel : IDisposable
 	{
 		/// <summary>経過時間群</summary>
-		public ReadOnlyReactiveProperty<IList<long>> Laps { get; }
+        public ReadOnlyReactiveProperty<IEnumerable<string>> FormattedLaps { get; }
 		/// <summary>時間の表示フォーマット</summary>
         public ReadOnlyReactiveProperty<string> TimeFormat { get; }
 
@@ -18,9 +18,7 @@ namespace StopWatchApp.Core.ViewModels
 		{
 			var stopWatch = modelPool.StopWatch;
 
-			Laps = stopWatch.Laps;
-			// ミリ秒以下表示有無に応じて、format書式文字列を切り替え（これはModelでやるべき？）
-			TimeFormat = stopWatch.IsVisibleMillis.Select(x => x ? @"mm\:ss\.fff" : @"mm\:ss").ToReadOnlyReactiveProperty();
+			FormattedLaps = stopWatch.FormattedLaps;
 		}
 
 		#region IDisposable implementation

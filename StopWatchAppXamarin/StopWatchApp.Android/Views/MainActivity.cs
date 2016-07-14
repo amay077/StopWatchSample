@@ -20,6 +20,7 @@ using StopWatchApp.Core.Frameworks.Messengers;
 using System.Collections.Generic;
 using StopWatchApp.Android.Extensions;
 using System.Linq;
+using StopWatchApp.Core.Extensions;
 
 namespace StopWatchApp.Android.Views
 {
@@ -34,21 +35,14 @@ namespace StopWatchApp.Android.Views
 		{
 			base.OnCreate (savedInstanceState);
 
-			_viewModel = new MainViewModel(this.Application as IModelPool);
+            _viewModel = new MainViewModel(this.Application as IModelPool);
 
-			// Set our view from the "main" layout resource
-			SetContentView (Resource.Layout.activity_main);
+            // Set our view from the "main" layout resource
+            SetContentView (Resource.Layout.activity_main);
 
-			// TextView(textTime) のバインド
-			FindViewById<TextView>(Resource.Id.textTime)
-				.SetBinding(v => v.Text, 
-					// フォーマットされた時間を表す Observable（time と timeFormat のどちらかが変更されたら更新）
-					_viewModel.Time
-					.CombineLatest(
-						_viewModel.TimeFormat,
-						(t, f) => TimeSpan.FromMilliseconds(t).ToString(f))
-					.ObserveOnUIDispatcher()
-					.ToReactiveProperty())
+            // TextView(textTime) のバインド
+            FindViewById<TextView>(Resource.Id.textTime)
+				.SetBinding(v => v.Text, _viewModel.FormattedTime.ObserveOnUIDispatcher().ToReactiveProperty())
 				.AddTo(_subscriptionOnCreate);
 
 			// Button(buttonStartStop) のバインド
@@ -83,18 +77,15 @@ namespace StopWatchApp.Android.Views
 				.SetCommand(_viewModel.CommandToggleVisibleMillis)
 				.AddTo(_subscriptionOnCreate);
 
-			// ListView(listLaps, ArrayAdapter) のバインド
-			// フォーマットされた経過時間群を表す Observable（time と timeFormat のどちらかが変更されたら更新）
-			var formattedLaps = _viewModel.Laps.CombineLatest(
-				_viewModel.TimeFormat, 
-				(laps, f) => laps.Select((x, i) => $"{i+1}.  {TimeSpan.FromMilliseconds(x).ToString(f)}"))
-				.ToReactiveProperty();
+            // ListView(listLaps, ArrayAdapter) のバインド
+            // 番号付きのリストに変換
+            var numberedLaps = _viewModel.FormattedLaps.ToNumberedLaps();
 
 			var listLaps = FindViewById<ListView>(Resource.Id.listLaps);
 			var listAdapter = new ArrayAdapter(this, global::Android.Resource.Layout.SimpleListItem1);
 			listLaps.Adapter = listAdapter;
 			listAdapter
-				.SetBinding(formattedLaps)
+                .SetBinding(numberedLaps)
 				.AddTo(_subscriptionOnCreate);
 			
 

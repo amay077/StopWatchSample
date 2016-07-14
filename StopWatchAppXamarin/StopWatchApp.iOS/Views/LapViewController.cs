@@ -10,6 +10,7 @@ using Reactive.Bindings;
 using StopWatchApp.iOS.Extensions;
 using Reactive.Bindings.Extensions;
 using System.Linq;
+using StopWatchApp.Core.Extensions;
 
 namespace StopWatchApp.iOS.Views
 {
@@ -29,13 +30,11 @@ namespace StopWatchApp.iOS.Views
 
 			_viewModel = new LapViewModel(UIApplication.SharedApplication.Delegate as IModelPool);
 
-			// ListView(listLaps, ArrayAdapter) のバインド
-			// フォーマットされた経過時間群を表す Observable（time と timeFormat のどちらかが変更されたら更新）
-			var formattedLaps = _viewModel.Laps.CombineLatest(
-				_viewModel.TimeFormat, 
-				(laps, f) => laps.Select((x, i) => $"{i+1}.  {TimeSpan.FromMilliseconds(x).ToString(f)}"))
-				.ToReactiveProperty();
-			tableLaps.SetBindingToSource(formattedLaps)
+            // ListView(listLaps, ArrayAdapter) のバインド
+            // 番号付きのリストに変換
+            var numberedLaps = _viewModel.FormattedLaps.ToNumberedLaps();
+			tableLaps
+                .SetBindingToSource(numberedLaps)
 				.AddTo(_subscriptionOnLoad);
 		}
 
