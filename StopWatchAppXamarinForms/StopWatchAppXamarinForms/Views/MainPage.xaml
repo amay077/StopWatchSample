@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ContentPage
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="StopWatchAppXamarinForms.Views.MainPage"
+    Title="StopWatch">
+    <ContentPage.Content>
+        <StackLayout Orientation="Vertical"
+                     Padding="5">
+            <Label Text="{Binding FormattedTime.Value}"
+                   FontSize="50"
+                   HorizontalOptions="CenterAndExpand" />
+            <Button Text="Start"
+                    Command="{Binding StartOrStopCommand}" />
+            <Button Text="Lap" />
+            <ListView VerticalOptions="FillAndExpand"
+                      BackgroundColor="Fuchsia" />
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

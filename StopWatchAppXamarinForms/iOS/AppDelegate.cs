@@ -14,7 +14,7 @@ namespace StopWatchAppXamarinForms.iOS
         {
             global::Xamarin.Forms.Forms.Init();
 
-            LoadApplication(new App());
+            LoadApplication(new FormsApp());
 
             return base.FinishedLaunching(app, options);
         }

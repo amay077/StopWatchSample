@@ -1,29 +1,34 @@
-﻿using Xamarin.Forms;
+﻿using System;
+using Prism.Mvvm;
+using Prism.Unity;
+using StopWatchAppXamarinForms.Views;
+using Xamarin.Forms;
 
 namespace StopWatchAppXamarinForms
 {
-    public partial class App : Application
+    public partial class App : PrismApplication
     {
-        public App()
+        protected override void OnInitialized()
         {
-            InitializeComponent();
-
-            MainPage = new StopWatchAppXamarinFormsPage();
+            NavigationService.NavigateAsync("NavigationPage/MainPage");
         }
 
-        protected override void OnStart()
+        protected override void RegisterTypes()
         {
-            // Handle when your app starts
+            Container.RegisterTypeForNavigation<MainPage>();
+            Container.RegisterTypeForNavigation<LapPage>();
         }
 
-        protected override void OnSleep()
+        protected override void ConfigureViewModelLocator()
         {
-            // Handle when your app sleeps
-        }
-
-        protected override void OnResume()
-        {
-            // Handle when your app resumes
+            base.ConfigureViewModelLocator();
+            ViewModelLocationProvider.SetDefaultViewTypeToViewModelTypeResolver(viewType =>
+            {
+                var vmNameSpace = viewType.Namespace.Replace("Views", "ViewModels");
+                var vmClassName = viewType.Name.Replace("Page", "ViewModel");
+                var vmTypeName = $"{vmNameSpace}.{vmClassName}";
+                return Type.GetType(vmTypeName);
+            });
         }
     }
 }
