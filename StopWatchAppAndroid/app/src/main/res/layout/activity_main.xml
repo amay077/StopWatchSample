@@ -25,7 +25,7 @@
 
         <Button
             android:id="@+id/buttonStartStop"
-            android:text="@{viewModel.runButtonTitle.value}"
+            android:text='@{viewModel.isRunning.value ? "Stop" : "Start"}'
             app:rxCommandOnClick="@{viewModel.startOrStopCommand}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

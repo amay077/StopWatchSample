@@ -2,7 +2,7 @@ package com.amay077.stopwatchapp.views.activities;
 
 import android.databinding.DataBindingUtil;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;import android.widget.ListView;
+import android.os.Bundle;
 
 import com.amay077.stopwatchapp.R;
 import com.amay077.stopwatchapp.databinding.ActivityLapBinding;

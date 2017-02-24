@@ -84,6 +84,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/test/shaders" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/assets" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/blame" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/builds" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/classes" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/data-binding-info" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/data-binding-layout-out" />
@@ -134,6 +135,7 @@
     <orderEntry type="library" exported="" name="support-core-utils-25.1.1" level="project" />
     <orderEntry type="library" exported="" name="support-fragment-25.1.1" level="project" />
     <orderEntry type="library" exported="" name="reactive-streams-1.0.0" level="project" />
+    <orderEntry type="library" exported="" name="stream-1.1.5" level="project" />
     <orderEntry type="library" exported="" name="guava-17.0" level="project" />
     <orderEntry type="library" exported="" name="kotlin-stdlib-1.0.0" level="project" />
     <orderEntry type="library" exported="" name="rx-property-3.0.0" level="project" />

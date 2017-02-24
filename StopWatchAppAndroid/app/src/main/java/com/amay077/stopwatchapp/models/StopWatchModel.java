@@ -1,6 +1,7 @@
 package com.amay077.stopwatchapp.models;
 
-import org.reactivestreams.Subscription;
+import com.annimon.stream.Optional;
+import com.annimon.stream.Stream;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.Subject;
 
+
 /**
  * ストップウォッチの機能を実装したロジッククラス
  */
@@ -28,62 +30,48 @@ public class StopWatchModel {
     private final BehaviorSubject<Boolean> _isVisibleMillis = BehaviorSubject.<Boolean>createDefault(true); // ミリ秒表示するか？
 
     // スレッドを超えて値を更新(onNext)するための SerializedSubject 群
-    private final Subject<Long> _timeSerialized = _time.toSerialized();// new SerializedSubject<Long, Long>(_time);
-    private final Subject<Boolean> _isRunningSerialized = _isRunning.toSerialized(); // new SerializedSubject<Boolean, Boolean>(_isRunning);
+    private final Subject<Long> _timeSerialized = _time.toSerialized();
+    private final Subject<Boolean> _isRunningSerialized = _isRunning.toSerialized();
 
     // タイマーの購読状況
     private Disposable _timerSubscription = null;
 
+    private String _formattedFastestLap;
+    private String _formattedWorstLap;
+
     // Model として公開するプロパティ
     // Subject をそのまま公開したくないので Observable<> にしている
-    public final Observable<Long> time = _time;
+    public final Observable<String> formattedTime;
+    public final Observable<List<String>> formattedLaps;
     public final Observable<Boolean> isRunning = _isRunning;
-    public final Observable<List<Long>> laps = _laps;
     public final Observable<Boolean> isVisibleMillis = _isVisibleMillis;
 
     private final AtomicLong _startTime = new AtomicLong(0L);
 
+    private String formatTime(long t, String format) {
+        final SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
+        return sdf.format(new Date(t));
+    }
+
     public StopWatchModel() {
-    }
+        Observable<String> _timeFormat = _isVisibleMillis.map(visible -> visible ? "mm:ss.SSS" : "mm:ss");
 
-    /**
-     * フォーマットされた時間を表す Observable（timeObservable と isVisibleMillis のどちらかが変更されたら更新）
-     *
-     * 拡張メソッドが使えたらなあ。。。
-     */
-    public Observable<String> formatTimeAsObservable(Observable<Long> timeObservable) {
-        return Observable.combineLatest(
-                timeObservable,
-                isVisibleMillis, (time, isVisibleMillis) -> {
-                    final String format = getTimeFormat(isVisibleMillis);
-                    final SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
-                    return sdf.format(new Date(time));
+        formattedTime = Observable.combineLatest(_time, _timeFormat,
+                (t, f) -> formatTime(t, f));
+
+        formattedLaps = Observable.combineLatest(_laps, _timeFormat,
+                (laps, f) ->  {
+                    Stream<Long> stream = Stream.of(laps);
+
+                    // NOTE ここで max/min を得るのは副作用なのでバッドパターンになり得るが、
+                    //      今回は用途が限定的なのでご勘弁。
+                    Optional<Long> max = stream.max((x, y)-> x.compareTo(y));
+                    _formattedWorstLap = formatTime(max.orElse(0L), f);
+                    Optional<Long> min = Stream.of(laps).min((x, y)-> x.compareTo(y));
+                    _formattedFastestLap = formatTime(min.orElse(0L), f);
+
+                    return Stream.of(laps).map(l -> formatTime(l, f)).toList();
                 });
-    }
-
-    /**
-     * フォーマットされた経過時間群を表す Observable（timesObservable と isVisibleMillis のどちらかが変更されたら更新）
-     *
-     * 拡張メソッドが使えたらなあ。。。
-     */
-    public Observable<List<String>> formatTimesAsObservable(Observable<List<Long>> timesObservable) {
-        return Observable.combineLatest(
-                timesObservable,
-                isVisibleMillis, (laps, isVisibleMillis) -> {
-                    final String format = getTimeFormat(isVisibleMillis);
-                    final SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
-
-                    final List<String> formattedLaps = new ArrayList<>();
-                    for (Long lap : laps) {
-                        formattedLaps.add(sdf.format(new Date(lap)));
-                    }
-
-                    return Collections.unmodifiableList(formattedLaps);
-                });
-    }
-
-    private String getTimeFormat(boolean isVisibleMillis) {
-        return isVisibleMillis ? "mm:ss.SSS" : "mm:ss";
     }
 
     /**
@@ -113,13 +101,17 @@ public class StopWatchModel {
                         })
                         .subscribe((Long notUse) -> {
                             // タイマー値を通知
-                            _timeSerialized.onNext(System.currentTimeMillis() - _startTime.get());
+                            updateTime();
                         });
+    }
+
+    private void updateTime() {
+        _timeSerialized.onNext(System.currentTimeMillis() - _startTime.get());
     }
 
     private void stop() {
 
-        _timeSerialized.onNext(System.currentTimeMillis() - _startTime.get());
+        updateTime();
 
         if (_timerSubscription != null) {
             _timerSubscription.dispose();
@@ -144,30 +136,18 @@ public class StopWatchModel {
             totalLap += lap;
         }
 
-        final long lap = System.currentTimeMillis() - _startTime.get();
-        newLaps.add(lap - totalLap);
+        updateTime();
+        newLaps.add(_time.getValue() - totalLap);
 
         _laps.onNext(Collections.unmodifiableList(newLaps));
     }
 
-    /** 最速ラップを取得(返り値でなく、Observableなプロパティにした方がホントはよい) */
-    public Long getFastestLap() {
-        final List<Long> laps = _laps.getValue();
-        if (laps.size() == 0) {
-            return null; // nullを使うことを許したまえ
-        } else {
-            return Collections.min(laps);
-        }
+    public String getFormattedFastestLap() {
+        return _formattedFastestLap;
     }
 
-    /** 最遅ラップを取得(返り値でなく、Observableなプロパティにした方がホントはよい) */
-    public Long getWorstLap() {
-        final List<Long> laps = _laps.getValue();
-        if (laps.size() == 0) {
-            return null; // nullを使うことを許したまえ
-        } else {
-            return Collections.max(laps);
-        }
+    public String getFormattedWorstLap() {
+        return _formattedWorstLap;
     }
 
     /**

@@ -18,7 +18,7 @@ import io.reactivex.disposables.CompositeDisposable;
 public class MainActivity extends AppCompatActivity {
 
     private /* final */  MainViewModel _viewModel;
-    private CompositeDisposable _subscriptions = new CompositeDisposable();
+    private final CompositeDisposable _subscriptions = new CompositeDisposable();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        _subscriptions.clear();
         _viewModel.dispose();
         super.onDestroy();
     }

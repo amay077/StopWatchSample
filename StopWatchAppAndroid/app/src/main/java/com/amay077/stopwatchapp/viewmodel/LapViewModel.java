@@ -6,14 +6,11 @@ import android.databinding.ObservableField;
 import com.amay077.stopwatchapp.App;
 import com.amay077.stopwatchapp.models.StopWatchModel;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import jp.keita.kagurazaka.rxproperty.ReadOnlyRxProperty;
-import jp.keita.kagurazaka.rxproperty.RxProperty;
 
 /**
  * Created by hrnv on 2015/12/20.
@@ -36,7 +33,7 @@ public class LapViewModel implements Disposable {
         _appContext = appContext;
         _stopWatch = getStopWatch();
 
-        formattedLaps = new ReadOnlyRxProperty<>(_stopWatch.formatTimesAsObservable(_stopWatch.laps));
+        formattedLaps = new ReadOnlyRxProperty<>(_stopWatch.formattedLaps);
     }
 
     @Override
