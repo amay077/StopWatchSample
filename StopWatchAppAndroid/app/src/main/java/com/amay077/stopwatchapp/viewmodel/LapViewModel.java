@@ -12,6 +12,7 @@ import java.util.List;
 
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import jp.keita.kagurazaka.rxproperty.ReadOnlyRxProperty;
 import jp.keita.kagurazaka.rxproperty.RxProperty;
 
 /**
@@ -27,7 +28,7 @@ public class LapViewModel implements Disposable {
 
 
     /** 経過時間群 */
-    public final RxProperty<List<LapItem>> formattedLaps;
+    public final ReadOnlyRxProperty<List<String>> formattedLaps;
 
     private final CompositeDisposable _subscriptions = new CompositeDisposable();
 
@@ -35,17 +36,7 @@ public class LapViewModel implements Disposable {
         _appContext = appContext;
         _stopWatch = getStopWatch();
 
-        formattedLaps = new RxProperty<>(_stopWatch.formatTimesAsObservable(_stopWatch.laps)
-                .map(fLaps -> {
-                    final List<LapItem> lapItems = new ArrayList<>();
-                    int i = 1;
-                    for (String lap : fLaps) {
-                        lapItems.add(new LapItem(String.valueOf(i), lap));
-                        i++;
-                    }
-
-                    return Collections.unmodifiableList(lapItems);
-                }));
+        formattedLaps = new ReadOnlyRxProperty<>(_stopWatch.formatTimesAsObservable(_stopWatch.laps));
     }
 
     @Override

@@ -16,6 +16,9 @@ import java.util.List;
 
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import jp.keita.kagurazaka.rxproperty.Nothing;
+import jp.keita.kagurazaka.rxproperty.ReadOnlyRxProperty;
+import jp.keita.kagurazaka.rxproperty.RxCommand;
 import jp.keita.kagurazaka.rxproperty.RxProperty;
 
 public class MainViewModel implements Disposable {
@@ -30,43 +33,47 @@ public class MainViewModel implements Disposable {
     // ■ViewModel として公開するプロパティ
 
     /** タイマー時間 */
-    public final RxProperty<String> formattedTime;
+    public final ReadOnlyRxProperty<String> formattedTime;
     /** タイマー時間 */
-    public final RxProperty<String> runButtonTitle;
+    public final ReadOnlyRxProperty<String> runButtonTitle;
     /** 実行中かどうか？ */
-    public final RxProperty<Boolean> isRunning;
+    public final ReadOnlyRxProperty<Boolean> isRunning;
     /** 経過時間群 */
-    public final RxProperty<List<LapItem>> formattedLaps;
+    public final ReadOnlyRxProperty<List<String>> formattedLaps;
     /** ミリ秒を表示するか？ */
     public final RxProperty<Boolean> isVisibleMillis;
+
+    public final RxCommand<Nothing> startOrStopCommand;
+    public final RxCommand<Nothing> lapCommand;
+    public final RxCommand<Nothing> toggleVisibleMillisCommand;
 
     // コンストラクタ
     public MainViewModel(Context appContext) {
         _stopWatch = ((App)appContext).getStopWatch();
 
         // StopWatchModel のプロパティをそのまま公開してるだけ
-        isRunning = new RxProperty<>(_stopWatch.isRunning); // ObservableUtil.toObservableField(_stopWatch.isRunning, _subscriptions);
-        formattedLaps = new RxProperty<>(_stopWatch.formatTimesAsObservable(_stopWatch.laps)
-                .map(fLaps -> {
-                    final List<LapItem> lapItems = new ArrayList<>();
-                    int i = 1;
-                    for (String lap : fLaps) {
-                        lapItems.add(new LapItem(String.valueOf(i), lap));
-                        i++;
-                    }
+        isRunning = new ReadOnlyRxProperty<>(_stopWatch.isRunning); // ObservableUtil.toObservableField(_stopWatch.isRunning, _subscriptions);
+//        formattedLaps = new ReadOnlyRxProperty<>(_stopWatch.formatTimesAsObservable(_stopWatch.laps)
+//                .map(fLaps -> {
+//                    final List<LapItem> lapItems = new ArrayList<>();
+//                    int i = 1;
+//                    for (String lap : fLaps) {
+//                        lapItems.add(new LapItem(String.valueOf(i), lap));
+//                        i++;
+//                    }
+//
+//                    return Collections.unmodifiableList(lapItems);
+//                }));
 
-                    return Collections.unmodifiableList(lapItems);
-                }));
+        formattedLaps = new ReadOnlyRxProperty<>(_stopWatch.formatTimesAsObservable(_stopWatch.laps));
 
         isVisibleMillis = new RxProperty<>(_stopWatch.isVisibleMillis);
 
-        runButtonTitle = new RxProperty<>(_stopWatch.isRunning.map(isRunning -> {
-            return isRunning ? "STOP" : "START";
-        }));
+        runButtonTitle = new ReadOnlyRxProperty<>(isRunning.map(isRunning -> isRunning ? "STOP" : "START"));
 
         // フォーマットされた時間を表す Observable（time と timeFormat のどちらかが変更されたら更新）
         // 表示用にthrottleで10ms毎に間引き。View側でやってもよいかも。
-        formattedTime = new RxProperty<>(_stopWatch.formatTimeAsObservable(_stopWatch.time));
+        formattedTime = new ReadOnlyRxProperty<>(_stopWatch.formatTimeAsObservable(_stopWatch.time));
 
         // STOP されたら、最速／最遅ラップを表示して、LapActivity へ遷移
         _subscriptions.add(
@@ -81,24 +88,25 @@ public class MainViewModel implements Disposable {
 
                     // LapActivity へ遷移させる
                     messenger.send(new StartActivityMessage(LapActivity.class)); // ホントは LapViewModel を指定して画面遷移すべき
-                }));;
-    }
+                }));
 
-    // ■ViewModel として公開するコマンド
+        /** 開始 or 終了 */
+        startOrStopCommand = new RxCommand<>();
+        startOrStopCommand.subscribe(n -> {
+            _stopWatch.startOrStop();
+        });
 
-    /** 開始 or 終了 */
-    public void onClickStartOrStop(View view) {
-        _stopWatch.startOrStop();
-    }
+        /** 経過時間の記録 */
+        lapCommand = new RxCommand<>(isRunning);
+        lapCommand.subscribe(it -> {
+            _stopWatch.lap();
+        });
 
-    /** 経過時間の記録 */
-    public void onClickLap(View view) {
-        _stopWatch.lap();
-    }
-
-    /** ミリ秒以下表示の切り替え */
-    public void onClickToggleVisibleMillis(View view) {
-        _stopWatch.toggleVisibleMillis();
+        /** ミリ秒以下表示の切り替え */
+        toggleVisibleMillisCommand = new RxCommand<>();
+        toggleVisibleMillisCommand.subscribe(it -> {
+            _stopWatch.toggleVisibleMillis();
+        });
     }
 
     @Override

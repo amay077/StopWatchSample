@@ -26,20 +26,20 @@
         <Button
             android:id="@+id/buttonStartStop"
             android:text="@{viewModel.runButtonTitle.value}"
-            android:onClick="@{viewModel.onClickStartOrStop}"
+            app:rxCommandOnClick="@{viewModel.startOrStopCommand}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <Button
             android:id="@+id/buttonLap"
             android:text="Lap"
             android:enabled="@{viewModel.isRunning.value}"
-            android:onClick="@{viewModel.onClickLap}"
+            app:rxCommandOnClick="@{viewModel.lapCommand}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <Switch
             android:id="@+id/switchVisibleMillis"
             android:checked="@{viewModel.isVisibleMillis.value}"
-            android:onClick="@{viewModel.onClickToggleVisibleMillis}"
+            app:rxCommandOnClick="@{viewModel.toggleVisibleMillisCommand}"
             android:text="小数点以下を表示"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
@@ -48,6 +48,6 @@
             android:id="@+id/listLaps"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:formattedLaps="@{viewModel}" />
+            app:stringListExProp="@{viewModel.formattedLaps}" />
     </LinearLayout>
 </layout>
