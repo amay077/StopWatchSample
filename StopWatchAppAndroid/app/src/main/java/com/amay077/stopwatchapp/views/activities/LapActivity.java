@@ -50,7 +50,7 @@ public class LapActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        _viewModel.unsubscribe();
+        _viewModel.dispose();
         super.onDestroy();
     }
 }

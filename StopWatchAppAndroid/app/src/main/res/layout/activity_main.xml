@@ -17,7 +17,7 @@
 
         <TextView android:id="@+id/textTime"
             tools:text="00:00.000"
-            android:text="@{viewModel.formattedTime}"
+            android:text="@{viewModel.formattedTime.value}"
             android:textSize="50sp"
             android:gravity="center_horizontal"
             android:layout_width="match_parent"
@@ -25,20 +25,20 @@
 
         <Button
             android:id="@+id/buttonStartStop"
-            android:text="@{viewModel.runButtonTitle}"
+            android:text="@{viewModel.runButtonTitle.value}"
             android:onClick="@{viewModel.onClickStartOrStop}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <Button
             android:id="@+id/buttonLap"
             android:text="Lap"
-            android:enabled="@{viewModel.isRunning}"
+            android:enabled="@{viewModel.isRunning.value}"
             android:onClick="@{viewModel.onClickLap}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <Switch
             android:id="@+id/switchVisibleMillis"
-            android:checked="@{viewModel.isVisibleMillis}"
+            android:checked="@{viewModel.isVisibleMillis.value}"
             android:onClick="@{viewModel.onClickToggleVisibleMillis}"
             android:text="小数点以下を表示"
             android:layout_width="wrap_content"

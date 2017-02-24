@@ -1,6 +1,6 @@
 package com.amay077.stopwatchapp.frameworks;
 
-import rx.Observable;
+import io.reactivex.Observable;
 
 /**
  * ViewModel のコマンドを示すインターフェース

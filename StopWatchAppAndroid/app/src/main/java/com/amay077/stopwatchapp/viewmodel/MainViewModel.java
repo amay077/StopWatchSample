@@ -16,86 +16,74 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import rx.Subscription;
-import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.Observable;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import jp.keita.kagurazaka.rxproperty.RxProperty;
 
-public class MainViewModel implements Subscription {
+public class MainViewModel implements Disposable {
 
     // 簡易Messenger(EventBus のようなもの)
     public final Messenger messenger = new Messenger();
 
     private final StopWatchModel _stopWatch;
 
-    private final CompositeSubscription _subscriptions = new CompositeSubscription();
+    private final CompositeDisposable _subscriptions = new CompositeDisposable();
 
     // ■ViewModel として公開するプロパティ
 
     /** タイマー時間 */
-    public final ObservableField<String> formattedTime;
+    public final RxProperty<String> formattedTime;
     /** タイマー時間 */
-    public final ObservableField<String> runButtonTitle;
+    public final RxProperty<String> runButtonTitle;
     /** 実行中かどうか？ */
-    public final ObservableField<Boolean> isRunning;
+    public final RxProperty<Boolean> isRunning;
     /** 経過時間群 */
-    public final ObservableField<List<LapItem>> formattedLaps;
+    public final RxProperty<List<LapItem>> formattedLaps;
     /** ミリ秒を表示するか？ */
-    public final ObservableField<Boolean> isVisibleMillis;
+    public final RxProperty<Boolean> isVisibleMillis;
 
     // コンストラクタ
     public MainViewModel(Context appContext) {
         _stopWatch = ((App)appContext).getStopWatch();
 
         // StopWatchModel のプロパティをそのまま公開してるだけ
-        isRunning = new RxField<>(_stopWatch.isRunning); // ObservableUtil.toObservableField(_stopWatch.isRunning, _subscriptions);
-        formattedLaps = new RxField<>(_stopWatch.formatTimesAsObservable(_stopWatch.laps)
-                .map(new Func1<List<String>, List<LapItem>>() {
-                    @Override
-                    public List<LapItem> call(List<String> fLaps) {
-                        final List<LapItem> lapItems = new ArrayList<>();
-                        int i = 1;
-                        for (String lap : fLaps) {
-                            lapItems.add(new LapItem(String.valueOf(i), lap));
-                            i++;
-                        }
-
-                        return Collections.unmodifiableList(lapItems);
+        isRunning = new RxProperty<>(_stopWatch.isRunning); // ObservableUtil.toObservableField(_stopWatch.isRunning, _subscriptions);
+        formattedLaps = new RxProperty<>(_stopWatch.formatTimesAsObservable(_stopWatch.laps)
+                .map(fLaps -> {
+                    final List<LapItem> lapItems = new ArrayList<>();
+                    int i = 1;
+                    for (String lap : fLaps) {
+                        lapItems.add(new LapItem(String.valueOf(i), lap));
+                        i++;
                     }
+
+                    return Collections.unmodifiableList(lapItems);
                 }));
 
-        isVisibleMillis = new RxField<>(_stopWatch.isVisibleMillis);
+        isVisibleMillis = new RxProperty<>(_stopWatch.isVisibleMillis);
 
-        runButtonTitle = new RxField<>(_stopWatch.isRunning.map(new Func1<Boolean, String>() {
-            @Override
-            public String call(Boolean isRunning) {
-                return isRunning ? "STOP" : "START";
-            }
+        runButtonTitle = new RxProperty<>(_stopWatch.isRunning.map(isRunning -> {
+            return isRunning ? "STOP" : "START";
         }));
 
         // フォーマットされた時間を表す Observable（time と timeFormat のどちらかが変更されたら更新）
         // 表示用にthrottleで10ms毎に間引き。View側でやってもよいかも。
-        formattedTime = new RxField<>(_stopWatch.formatTimeAsObservable(_stopWatch.time));
+        formattedTime = new RxProperty<>(_stopWatch.formatTimeAsObservable(_stopWatch.time));
 
         // STOP されたら、最速／最遅ラップを表示して、LapActivity へ遷移
         _subscriptions.add(
-                _stopWatch.isRunning.filter(new Func1<Boolean, Boolean>() {
-                    @Override
-                    public Boolean call(Boolean isRunning) {
-                        return !isRunning;
-                    }
+                _stopWatch.isRunning.filter(isRunning -> {
+                    return !isRunning;
                 })
-                .subscribe(new Action1<Boolean>() {
-                    @Override
-                    public void call(Boolean notUse) {
-                        // Toast を表示させる
-                        messenger.send(new ShowToastMessages(
-                                "最速ラップ:" + _stopWatch.getFastestLap() + // FIXME 時間がformatされてない
-                                        ", 最遅ラップ:" + _stopWatch.getWorstLap()));
+                .subscribe(notUse -> {
+                    // Toast を表示させる
+                    messenger.send(new ShowToastMessages(
+                            "最速ラップ:" + _stopWatch.getFastestLap() + // FIXME 時間がformatされてない
+                                    ", 最遅ラップ:" + _stopWatch.getWorstLap()));
 
-                        // LapActivity へ遷移させる
-                        messenger.send(new StartActivityMessage(LapActivity.class)); // ホントは LapViewModel を指定して画面遷移すべき
-                    }
+                    // LapActivity へ遷移させる
+                    messenger.send(new StartActivityMessage(LapActivity.class)); // ホントは LapViewModel を指定して画面遷移すべき
                 }));;
     }
 
@@ -117,12 +105,12 @@ public class MainViewModel implements Subscription {
     }
 
     @Override
-    public void unsubscribe() {
-        _subscriptions.unsubscribe();
+    public void dispose() {
+        _subscriptions.dispose();
     }
 
     @Override
-    public boolean isUnsubscribed() {
-        return _subscriptions.isUnsubscribed();
+    public boolean isDisposed() {
+        return _subscriptions.isDisposed();
     }
 }

@@ -11,15 +11,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import rx.Observable;
-import rx.Subscription;
-import rx.functions.Func1;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Created by hrnv on 2015/12/20.
  */
-public class LapViewModel implements Subscription {
+public class LapViewModel implements Disposable {
     private final Context _appContext;
     private final StopWatchModel _stopWatch;
 
@@ -31,35 +29,32 @@ public class LapViewModel implements Subscription {
     /** 経過時間群 */
     public final ObservableField<List<LapItem>> formattedLaps;
 
-    private final CompositeSubscription _subscriptions = new CompositeSubscription();
+    private final CompositeDisposable _subscriptions = new CompositeDisposable();
 
     public LapViewModel(Context appContext) {
         _appContext = appContext;
         _stopWatch = getStopWatch();
 
         formattedLaps = new RxField<>(_stopWatch.formatTimesAsObservable(_stopWatch.laps)
-                .map(new Func1<List<String>, List<LapItem>>() {
-                    @Override
-                    public List<LapItem> call(List<String> fLaps) {
-                        final List<LapItem> lapItems = new ArrayList<>();
-                        int i = 1;
-                        for (String lap : fLaps) {
-                            lapItems.add(new LapItem(String.valueOf(i), lap));
-                            i++;
-                        }
-
-                        return Collections.unmodifiableList(lapItems);
+                .map(fLaps -> {
+                    final List<LapItem> lapItems = new ArrayList<>();
+                    int i = 1;
+                    for (String lap : fLaps) {
+                        lapItems.add(new LapItem(String.valueOf(i), lap));
+                        i++;
                     }
+
+                    return Collections.unmodifiableList(lapItems);
                 }));
     }
 
     @Override
-    public void unsubscribe() {
-        _subscriptions.unsubscribe();
+    public void dispose() {
+        _subscriptions.dispose();
     }
 
     @Override
-    public boolean isUnsubscribed() {
-        return _subscriptions.isUnsubscribed();
+    public boolean isDisposed() {
+        return _subscriptions.isDisposed();
     }
 }
