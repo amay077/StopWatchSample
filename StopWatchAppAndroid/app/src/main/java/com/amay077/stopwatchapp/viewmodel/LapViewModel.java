@@ -3,7 +3,6 @@ package com.amay077.stopwatchapp.viewmodel;
 import android.content.Context;
 import android.databinding.ObservableField;
 
-import com.amay077.databinding.RxField;
 import com.amay077.stopwatchapp.App;
 import com.amay077.stopwatchapp.models.StopWatchModel;
 
@@ -13,6 +12,7 @@ import java.util.List;
 
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import jp.keita.kagurazaka.rxproperty.RxProperty;
 
 /**
  * Created by hrnv on 2015/12/20.
@@ -27,7 +27,7 @@ public class LapViewModel implements Disposable {
 
 
     /** 経過時間群 */
-    public final ObservableField<List<LapItem>> formattedLaps;
+    public final RxProperty<List<LapItem>> formattedLaps;
 
     private final CompositeDisposable _subscriptions = new CompositeDisposable();
 
@@ -35,7 +35,7 @@ public class LapViewModel implements Disposable {
         _appContext = appContext;
         _stopWatch = getStopWatch();
 
-        formattedLaps = new RxField<>(_stopWatch.formatTimesAsObservable(_stopWatch.laps)
+        formattedLaps = new RxProperty<>(_stopWatch.formatTimesAsObservable(_stopWatch.laps)
                 .map(fLaps -> {
                     final List<LapItem> lapItems = new ArrayList<>();
                     int i = 1;

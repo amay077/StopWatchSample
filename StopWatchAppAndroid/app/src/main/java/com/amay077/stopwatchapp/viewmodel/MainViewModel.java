@@ -1,10 +1,8 @@
 package com.amay077.stopwatchapp.viewmodel;
 
 import android.content.Context;
-import android.databinding.ObservableField;
 import android.view.View;
 
-import com.amay077.databinding.RxField;
 import com.amay077.stopwatchapp.App;
 import com.amay077.stopwatchapp.frameworks.messengers.Messenger;
 import com.amay077.stopwatchapp.frameworks.messengers.ShowToastMessages;
@@ -16,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import jp.keita.kagurazaka.rxproperty.RxProperty;
