@@ -122,7 +122,7 @@ namespace StopWatchAppXamarinForms.Models
 
         void UpdateTime()
         {
-            _time.Value = (DateTime.Now.Ticks - _startTime) / 1000;
+            _time.Value = (DateTime.Now.Ticks - _startTime) / 10000;
         }
 
         /// <summary>

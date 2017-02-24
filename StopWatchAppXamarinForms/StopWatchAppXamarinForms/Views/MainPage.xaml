@@ -24,7 +24,13 @@
             <Button Text="Lap"
                     Command="{Binding LapCommand}" />
             <ListView VerticalOptions="FillAndExpand"
-                      BackgroundColor="Fuchsia" />
+                      ItemsSource="{Binding FormattedLaps.Value}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextCell Text="{Binding .}" TextColor="Black" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

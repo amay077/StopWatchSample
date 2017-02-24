@@ -1,9 +1,6 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Prism.Navigation;
@@ -25,7 +22,7 @@ namespace StopWatchAppXamarinForms.ViewModels
         /// <summary> 実行中かどうか？ </summary>
         public ReadOnlyReactiveProperty<bool> IsRunning { get; }
         /// <summary> フォーマットされた経過時間群 </summary>
-        public ReadOnlyReactiveCollection<string> FormattedLaps { get; }
+        public ReadOnlyReactiveProperty<IEnumerable<string>> FormattedLaps { get; }
         /// <summary> ミリ秒を表示するか？ </summary>
         public ReadOnlyReactiveProperty<bool> IsVisibleMillis { get; }
 
@@ -44,7 +41,7 @@ namespace StopWatchAppXamarinForms.ViewModels
             // ■プロパティの実装
             // StopWatchModel の各プロパティをそのまま公開してるだけ
             IsRunning = stopWatch.IsRunning.ToReadOnlyReactiveProperty();
-            FormattedLaps = stopWatch.FormattedLaps.Select(x=>new ObservableCollection<string>(x));
+            FormattedLaps = stopWatch.FormattedLaps;
             IsVisibleMillis = stopWatch.IsVisibleMillis.ToReadOnlyReactiveProperty();
 
             // 表示用にthrottleで20ms毎に間引き。View側でやってもよいかも。
@@ -58,9 +55,10 @@ namespace StopWatchAppXamarinForms.ViewModels
                 {
                 // Alert を表示させる
                     await dialogService.DisplayAlertAsync(
-                        "最速最遅ラップ",
-                    $"最速ラップ:{stopWatch.FormattedFastestLap.Value}, 最遅ラップ:{stopWatch.FormattedWorstLap.Value}",
-                        "閉じる");
+                        "Fastest/Worst Lap",
+                        $"Fastest:{stopWatch.FormattedFastestLap.Value}\n" +
+                        $"Worst:{stopWatch.FormattedWorstLap.Value}",
+                        "Close");
 
                     // LapActivity へ遷移させる
                     await navigationService.NavigateAsync("LapPage");
