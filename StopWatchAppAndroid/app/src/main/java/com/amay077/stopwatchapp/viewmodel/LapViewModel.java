@@ -8,6 +8,8 @@ import com.amay077.stopwatchapp.models.StopWatchModel;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import jp.keita.kagurazaka.rxproperty.ReadOnlyRxProperty;
@@ -16,24 +18,15 @@ import jp.keita.kagurazaka.rxproperty.ReadOnlyRxProperty;
  * Created by hrnv on 2015/12/20.
  */
 public class LapViewModel implements Disposable {
-    private final Context _appContext;
-    private final StopWatchModel _stopWatch;
-
-    private StopWatchModel getStopWatch() {
-        return ((App)_appContext).getStopWatch();
-    }
-
 
     /** 経過時間群 */
     public final ReadOnlyRxProperty<List<String>> formattedLaps;
 
     private final CompositeDisposable _subscriptions = new CompositeDisposable();
 
-    public LapViewModel(Context appContext) {
-        _appContext = appContext;
-        _stopWatch = getStopWatch();
-
-        formattedLaps = new ReadOnlyRxProperty<>(_stopWatch.formattedLaps);
+    @Inject
+    public LapViewModel(StopWatchModel stopWatch) {
+        formattedLaps = new ReadOnlyRxProperty<>(stopWatch.formattedLaps);
     }
 
     @Override

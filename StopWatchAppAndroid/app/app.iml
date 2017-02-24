@@ -136,12 +136,14 @@
     <orderEntry type="library" exported="" name="support-fragment-25.1.1" level="project" />
     <orderEntry type="library" exported="" name="reactive-streams-1.0.0" level="project" />
     <orderEntry type="library" exported="" name="stream-1.1.5" level="project" />
+    <orderEntry type="library" exported="" name="javax.inject-1" level="project" />
     <orderEntry type="library" exported="" name="guava-17.0" level="project" />
     <orderEntry type="library" exported="" name="kotlin-stdlib-1.0.0" level="project" />
     <orderEntry type="library" exported="" name="rx-property-3.0.0" level="project" />
     <orderEntry type="library" exported="" name="support-v4-25.1.1" level="project" />
     <orderEntry type="library" exported="" name="support-compat-25.1.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="hamcrest-core-1.3" level="project" />
+    <orderEntry type="library" exported="" name="dagger-2.7" level="project" />
     <orderEntry type="library" exported="" name="support-media-compat-25.1.1" level="project" />
     <orderEntry type="library" exported="" name="commons-codec-1.10" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="junit-4.12" level="project" />

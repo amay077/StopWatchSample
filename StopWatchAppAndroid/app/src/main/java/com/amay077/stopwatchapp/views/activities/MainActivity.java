@@ -6,18 +6,23 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.amay077.stopwatchapp.App;
 import com.amay077.stopwatchapp.R;
 import com.amay077.stopwatchapp.databinding.ActivityMainBinding;
+import com.amay077.stopwatchapp.di.ActivityModule;
 import com.amay077.stopwatchapp.frameworks.messengers.ShowToastMessages;
 import com.amay077.stopwatchapp.frameworks.messengers.StartActivityMessage;
 import com.amay077.stopwatchapp.viewmodel.MainViewModel;
+
+import javax.inject.Inject;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 
 public class MainActivity extends AppCompatActivity {
 
-    private /* final */  MainViewModel _viewModel;
+    @Inject
+    /*private final*/ MainViewModel _viewModel;
     private final CompositeDisposable _subscriptions = new CompositeDisposable();
 
     @Override
@@ -25,7 +30,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         final ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
-        _viewModel = new MainViewModel(this.getApplicationContext());
+        // Inject by Dagger2
+        final App app = (App) getApplication();
+        app.getApplicationComponent().inject(this);
+
         binding.setViewModel(_viewModel);
 
         // ■ViewModel からの Message の受信

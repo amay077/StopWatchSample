@@ -11,6 +11,8 @@ import com.amay077.stopwatchapp.views.activities.LapActivity;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import jp.keita.kagurazaka.rxproperty.Nothing;
@@ -22,8 +24,6 @@ public class MainViewModel implements Disposable {
 
     // 簡易Messenger(EventBus のようなもの)
     public final Messenger messenger = new Messenger();
-
-    private final StopWatchModel _stopWatch;
 
     private final CompositeDisposable _subscriptions = new CompositeDisposable();
 
@@ -43,29 +43,29 @@ public class MainViewModel implements Disposable {
     public final RxCommand<Nothing> toggleVisibleMillisCommand;
 
     // コンストラクタ
-    public MainViewModel(Context appContext) {
-        _stopWatch = ((App)appContext).getStopWatch();
+    @Inject
+    public MainViewModel(StopWatchModel stopWatch) {
 
         // StopWatchModel のプロパティをそのまま公開してるだけ
-        isRunning = new ReadOnlyRxProperty<>(_stopWatch.isRunning); // ObservableUtil.toObservableField(_stopWatch.isRunning, _subscriptions);
-        formattedLaps = new ReadOnlyRxProperty<>(_stopWatch.formattedLaps);
+        isRunning = new ReadOnlyRxProperty<>(stopWatch.isRunning);
+        formattedLaps = new ReadOnlyRxProperty<>(stopWatch.formattedLaps);
 
-        isVisibleMillis = new RxProperty<>(_stopWatch.isVisibleMillis);
+        isVisibleMillis = new RxProperty<>(stopWatch.isVisibleMillis);
 
         // フォーマットされた時間を表す Observable（time と timeFormat のどちらかが変更されたら更新）
         // 表示用にthrottleで10ms毎に間引き。View側でやってもよいかも。
-        formattedTime = new ReadOnlyRxProperty<>(_stopWatch.formattedTime);
+        formattedTime = new ReadOnlyRxProperty<>(stopWatch.formattedTime);
 
         // STOP されたら、最速／最遅ラップを表示して、LapActivity へ遷移
         _subscriptions.add(
-                _stopWatch.isRunning.filter(isRunning -> {
+                stopWatch.isRunning.filter(isRunning -> {
                     return !isRunning;
                 })
                 .subscribe(notUse -> {
                     // Toast を表示させる
                     messenger.send(new ShowToastMessages(
-                            "最速ラップ:" + _stopWatch.getFormattedFastestLap() +
-                            ", 最遅ラップ:" + _stopWatch.getFormattedWorstLap()));
+                            "最速ラップ:" + stopWatch.getFormattedFastestLap() +
+                            ", 最遅ラップ:" + stopWatch.getFormattedWorstLap()));
 
                     // LapActivity へ遷移させる
                     messenger.send(new StartActivityMessage(LapActivity.class)); // ホントは LapViewModel を指定して画面遷移すべき
@@ -74,19 +74,19 @@ public class MainViewModel implements Disposable {
         /** 開始 or 終了 */
         startOrStopCommand = new RxCommand<>();
         startOrStopCommand.subscribe(n -> {
-            _stopWatch.startOrStop();
+            stopWatch.startOrStop();
         });
 
         /** 経過時間の記録 */
         lapCommand = new RxCommand<>(isRunning);
         lapCommand.subscribe(it -> {
-            _stopWatch.lap();
+            stopWatch.lap();
         });
 
         /** ミリ秒以下表示の切り替え */
         toggleVisibleMillisCommand = new RxCommand<>();
         toggleVisibleMillisCommand.subscribe(it -> {
-            _stopWatch.toggleVisibleMillis();
+            stopWatch.toggleVisibleMillis();
         });
     }
 
