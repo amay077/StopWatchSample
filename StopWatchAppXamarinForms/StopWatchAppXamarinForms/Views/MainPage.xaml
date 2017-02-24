@@ -3,17 +3,26 @@
 <ContentPage
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vc="clr-namespace:StopWatchAppXamarinForms.ValueConverters;assembly=StopWatchAppXamarinForms"
     x:Class="StopWatchAppXamarinForms.Views.MainPage"
     Title="StopWatch">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <vc:ButtonTitleConverter x:Key="titleConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    
     <ContentPage.Content>
         <StackLayout Orientation="Vertical"
                      Padding="5">
             <Label Text="{Binding FormattedTime.Value}"
                    FontSize="50"
                    HorizontalOptions="CenterAndExpand" />
-            <Button Text="Start"
+            <Button Text="{Binding IsRunning.Value, Converter={StaticResource titleConverter}}"
                     Command="{Binding StartOrStopCommand}" />
-            <Button Text="Lap" />
+            <Button Text="Lap"
+                    Command="{Binding LapCommand}" />
             <ListView VerticalOptions="FillAndExpand"
                       BackgroundColor="Fuchsia" />
         </StackLayout>

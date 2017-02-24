@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Threading;
 using Reactive.Bindings;
 
 namespace StopWatchAppXamarinForms.Models
@@ -14,14 +15,13 @@ namespace StopWatchAppXamarinForms.Models
     public class StopWatchModel : IStopWatchModel
     {
         // ストップウォッチの状態を更新＆通知するための ReactiveProperty 群(要は Subject)
-        private readonly ReactiveProperty<long> _time = new ReactiveProperty<long>(0L); // タイマー時間
+        private readonly ReactiveProperty<long> _time = new ReactiveProperty<long>(Scheduler.Default, 0L); // タイマー時間
 
-        private readonly ReactiveProperty<bool> _isRunning = new ReactiveProperty<bool>(false); // 実行中か？
+        private readonly ReactiveProperty<bool> _isRunning = new ReactiveProperty<bool>(Scheduler.Default, false); // 実行中か？
 
-        private readonly ReactiveProperty<IList<long>> _laps =
-            new ReactiveProperty<IList<long>>(new List<long>()); // 経過時間群
+        private readonly ReactiveProperty<IList<long>> _laps = new ReactiveProperty<IList<long>>(new List<long>()); // 経過時間群
 
-        private readonly ReactiveProperty<bool> _isVisibleMillis = new ReactiveProperty<bool>(true); // ミリ秒表示するか？
+        private readonly ReactiveProperty<bool> _isVisibleMillis = new ReactiveProperty<bool>(Scheduler.Default, true); // ミリ秒表示するか？
         private readonly ReactiveProperty<string> _timeFormat;
 
         // Model として公開するプロパティ
@@ -36,38 +36,40 @@ namespace StopWatchAppXamarinForms.Models
         // タイマーの購読状況
         private IDisposable _timerSubscription = null;
 
+        private long _startTime;
+
         public StopWatchModel()
         {
             Debug.WriteLine("StopWatchModel ctor");
 
-            IsRunning = _isRunning.ToReadOnlyReactiveProperty();
-            IsVisibleMillis = _isVisibleMillis.ToReadOnlyReactiveProperty();
+            IsRunning = _isRunning.ToReadOnlyReactiveProperty(eventScheduler: Scheduler.Default);
+            IsVisibleMillis = _isVisibleMillis.ToReadOnlyReactiveProperty(eventScheduler: Scheduler.Default);
 
             _timeFormat = IsVisibleMillis
                 .Select(v => v ? @"mm\:ss\.fff" : @"mm\:ss")
-                .ToReactiveProperty();
+                .ToReactiveProperty(raiseEventScheduler: Scheduler.Default);
 
             FormattedTime = _time.CombineLatest(_timeFormat, (time, format) =>
                     TimeSpan.FromMilliseconds(time).ToString(format))
-                .ToReadOnlyReactiveProperty();
+                .ToReadOnlyReactiveProperty(eventScheduler: Scheduler.Default);
 
             FormattedLaps = _laps.CombineLatest(_timeFormat,
                     (laps, f) => laps.Select((x, i) => TimeSpan.FromMilliseconds(x).ToString(f)))
-                .ToReadOnlyReactiveProperty();
+                .ToReadOnlyReactiveProperty(eventScheduler: Scheduler.Default);
 
             FormattedFastestLap = _laps.CombineLatest(_timeFormat, (laps, format) =>
                 {
                 var fastest = laps.Count > 0 ? laps.Min() : 0;
                     return TimeSpan.FromMilliseconds(fastest).ToString(format);
                 })
-                .ToReadOnlyReactiveProperty();
+                .ToReadOnlyReactiveProperty(eventScheduler: Scheduler.Default);
 
             FormattedWorstLap = _laps.CombineLatest(_timeFormat, (laps, format) =>
                 {
                     var worst = laps.Count > 0 ? laps.Max() : 0;
                     return TimeSpan.FromMilliseconds(worst).ToString(format);
                 })
-                .ToReadOnlyReactiveProperty();
+                .ToReadOnlyReactiveProperty(eventScheduler: Scheduler.Default);
         }
 
         /// <summary>
@@ -75,7 +77,7 @@ namespace StopWatchAppXamarinForms.Models
         /// </summary>
         public void StartOrStop()
         {
-            if (!IsRunning.Value)
+            if (!_isRunning.Value)
             {
                 Start();
             }
@@ -87,7 +89,7 @@ namespace StopWatchAppXamarinForms.Models
 
         private void Start()
         {
-            if (IsRunning.Value)
+            if (_isRunning.Value)
             {
                 Stop();
             }
@@ -97,14 +99,11 @@ namespace StopWatchAppXamarinForms.Models
             _laps.Value = new List<long>();
             ;
             _isRunning.Value = true;
-            var now = DateTime.Now;
+            _startTime = DateTime.Now.Ticks;
 
             _timerSubscription =
-                Observable.Interval(TimeSpan.FromMilliseconds(1000), Scheduler.Default)
-                    .Subscribe(time =>
-                    {
-                        _time.Value = Convert.ToInt64((DateTime.Now - now).TotalMilliseconds);
-                    }); // タイマー値を通知
+                Observable.Interval(TimeSpan.FromMilliseconds(100))
+                          .Subscribe(_ => UpdateTime()); // タイマー値を通知
         }
 
         private void Stop()
@@ -115,8 +114,15 @@ namespace StopWatchAppXamarinForms.Models
                 _timerSubscription = null;
             }
 
+            UpdateTime();
+
             // 実行終了を通知
             _isRunning.Value = false;
+        }
+
+        void UpdateTime()
+        {
+            _time.Value = (DateTime.Now.Ticks - _startTime) / 1000;
         }
 
         /// <summary>
@@ -135,6 +141,7 @@ namespace StopWatchAppXamarinForms.Models
                 totalLap += lap;
             }
 
+            UpdateTime();
             newLaps.Add(_time.Value - totalLap);
 
             _laps.Value = newLaps;

@@ -1,6 +1,8 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -23,7 +25,7 @@ namespace StopWatchAppXamarinForms.ViewModels
         /// <summary> 実行中かどうか？ </summary>
         public ReadOnlyReactiveProperty<bool> IsRunning { get; }
         /// <summary> フォーマットされた経過時間群 </summary>
-        public ReadOnlyReactiveProperty<IEnumerable<string>> FormattedLaps { get; }
+        public ReadOnlyReactiveCollection<string> FormattedLaps { get; }
         /// <summary> ミリ秒を表示するか？ </summary>
         public ReadOnlyReactiveProperty<bool> IsVisibleMillis { get; }
 
@@ -41,29 +43,29 @@ namespace StopWatchAppXamarinForms.ViewModels
         {
             // ■プロパティの実装
             // StopWatchModel の各プロパティをそのまま公開してるだけ
-            IsRunning = stopWatch.IsRunning;
-            FormattedLaps = stopWatch.FormattedLaps;
-            IsVisibleMillis = stopWatch.IsVisibleMillis;
+            IsRunning = stopWatch.IsRunning.ToReadOnlyReactiveProperty();
+            FormattedLaps = stopWatch.FormattedLaps.Select(x=>new ObservableCollection<string>(x));
+            IsVisibleMillis = stopWatch.IsVisibleMillis.ToReadOnlyReactiveProperty();
 
             // 表示用にthrottleで20ms毎に間引き。View側でやってもよいかも。
             FormattedTime = stopWatch.FormattedTime
-                .Throttle(TimeSpan.FromMilliseconds(100), Scheduler.Default)
+                //.Do(x=> Debug.WriteLine($"Throttled:{x}"))
                 .ToReadOnlyReactiveProperty();
 
             //// STOP されたら、最速／最遅ラップを表示して、LapActivity へ遷移
-            //IsRunning.Where(x => true)
-            //    .Subscribe(async _ =>
-            //    {
-            //        // Alert を表示させる
-            //        await dialogService.DisplayAlertAsync(
-            //            "最速最遅ラップ",
-            //            $"最速ラップ:{stopWatch.FormattedFastestLap.Value}, 最遅ラップ:{stopWatch.FormattedWorstLap.Value}",
-            //            "閉じる");
+            IsRunning.Buffer(2, 1).Where(x => x[0] && !x[1])
+                .Subscribe(async _ =>
+                {
+                // Alert を表示させる
+                    await dialogService.DisplayAlertAsync(
+                        "最速最遅ラップ",
+                    $"最速ラップ:{stopWatch.FormattedFastestLap.Value}, 最遅ラップ:{stopWatch.FormattedWorstLap.Value}",
+                        "閉じる");
 
-            //        // LapActivity へ遷移させる
-            //        await navigationService.NavigateAsync("LapPage");
-            //    })
-            //    .AddTo(_subscriptions);
+                    // LapActivity へ遷移させる
+                    await navigationService.NavigateAsync("LapPage");
+                })
+                .AddTo(_subscriptions);
 
 
             // ■コマンドの実装
