@@ -29,7 +29,7 @@ namespace StopWatchAppXamarinForms.Models
 
         public ReadOnlyReactiveProperty<bool> IsRunning { get; } // 実行中か？
         public ReadOnlyReactiveProperty<IEnumerable<string>> FormattedLaps { get; } // フォーマットされた経過時間群
-        public ReadOnlyReactiveProperty<bool> IsVisibleMillis { get; } // ミリ秒表示するか？
+        public ReactiveProperty<bool> IsVisibleMillis { get; } // ミリ秒表示するか？
         public ReadOnlyReactiveProperty<string> FormattedFastestLap { get; }
         public ReadOnlyReactiveProperty<string> FormattedWorstLap { get; }
 
@@ -43,7 +43,7 @@ namespace StopWatchAppXamarinForms.Models
             Debug.WriteLine("StopWatchModel ctor");
 
             IsRunning = _isRunning.ToReadOnlyReactiveProperty(eventScheduler: Scheduler.Default);
-            IsVisibleMillis = _isVisibleMillis.ToReadOnlyReactiveProperty(eventScheduler: Scheduler.Default);
+            IsVisibleMillis = _isVisibleMillis;
 
             _timeFormat = IsVisibleMillis
                 .Select(v => v ? @"mm\:ss\.fff" : @"mm\:ss")

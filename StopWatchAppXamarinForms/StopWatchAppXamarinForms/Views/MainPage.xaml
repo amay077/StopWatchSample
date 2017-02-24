@@ -23,6 +23,11 @@
                     Command="{Binding StartOrStopCommand}" />
             <Button Text="Lap"
                     Command="{Binding LapCommand}" />
+
+            <StackLayout Orientation="Horizontal">
+                <Switch IsToggled="{Binding IsVisibleMillis.Value}" />
+                <Label Text="小数点以下を表示" VerticalOptions="Center"/>
+            </StackLayout>
             <ListView VerticalOptions="FillAndExpand"
                       ItemsSource="{Binding FormattedLaps.Value}">
                 <ListView.ItemTemplate>

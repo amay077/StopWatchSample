@@ -24,7 +24,7 @@ namespace StopWatchAppXamarinForms.ViewModels
         /// <summary> フォーマットされた経過時間群 </summary>
         public ReadOnlyReactiveProperty<IEnumerable<string>> FormattedLaps { get; }
         /// <summary> ミリ秒を表示するか？ </summary>
-        public ReadOnlyReactiveProperty<bool> IsVisibleMillis { get; }
+        public ReactiveProperty<bool> IsVisibleMillis { get; }
 
         // ■ViewModel として公開するコマンド
 
@@ -40,9 +40,9 @@ namespace StopWatchAppXamarinForms.ViewModels
         {
             // ■プロパティの実装
             // StopWatchModel の各プロパティをそのまま公開してるだけ
-            IsRunning = stopWatch.IsRunning.ToReadOnlyReactiveProperty();
+            IsRunning = stopWatch.IsRunning;
             FormattedLaps = stopWatch.FormattedLaps;
-            IsVisibleMillis = stopWatch.IsVisibleMillis.ToReadOnlyReactiveProperty();
+            IsVisibleMillis = stopWatch.IsVisibleMillis;
 
             // 表示用にthrottleで20ms毎に間引き。View側でやってもよいかも。
             FormattedTime = stopWatch.FormattedTime
