@@ -27,7 +27,7 @@ namespace StopWatchAppXamarinForms.Droid
 
             global::Xamarin.Forms.Forms.Init(this, bundle);
 
-            LoadApplication(new FormsApp());
+            LoadApplication(new FormsApp(new AndroidInitializer()));
         }
     }
 

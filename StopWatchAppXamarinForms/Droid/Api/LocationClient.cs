@@ -16,6 +16,9 @@ namespace StopWatchAppXamarinForms.Droid.Api
         private readonly LocationManager _locationManager;
 
         public event EventHandler<Location> LocationChanged;
+        public event EventHandler<bool> IsRunningChanged;
+
+        public bool IsRunning { get; private set; }
 
         public LocationClient(Context context)
         {
@@ -24,12 +27,16 @@ namespace StopWatchAppXamarinForms.Droid.Api
 
         public void Start()
         {
+            IsRunning = true;
+            IsRunningChanged?.Invoke(this, true);
             _locationManager.RequestLocationUpdates(LocationManager.GpsProvider, 0, 0, this);
         }
 
         public void Stop()
         {
             _locationManager.RemoveUpdates(this);
+            IsRunning = false;
+            IsRunningChanged?.Invoke(this, false);
         }
 
         void ILocationListener.OnLocationChanged(ALocation location)
