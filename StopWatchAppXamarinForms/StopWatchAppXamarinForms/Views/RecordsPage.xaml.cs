@@ -5,9 +5,9 @@ using Xamarin.Forms;
 
 namespace StopWatchAppXamarinForms.Views
 {
-    public partial class LapPage : ContentPage
+    public partial class RecordsPage : ContentPage
     {
-        public LapPage()
+        public RecordsPage()
         {
             InitializeComponent();
         }

@@ -31,7 +31,7 @@
     <EmbeddedResource Include="Views\MainPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Include="Views\LapPage.xaml">
+    <EmbeddedResource Include="Views\RecordsPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>
@@ -41,18 +41,19 @@
     <Compile Include="Views\MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\LapPage.xaml.cs">
-      <DependentUpon>LapPage.xaml</DependentUpon>
+    <Compile Include="Views\RecordsPage.xaml.cs">
+      <DependentUpon>RecordsPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="FormsApp.cs" />
-    <Compile Include="ViewModels\LapViewModel.cs" />
+    <Compile Include="ViewModels\RecordsViewModel.cs" />
     <Compile Include="Models\StopWatchModel.cs" />
-    <Compile Include="ValueConverters\ButtonTitleConverter.cs" />
+    <Compile Include="ValueConverters\StartStopTitleConverter.cs" />
     <Compile Include="Api\ILocationClient.cs" />
     <Compile Include="Api\DataModels\Location.cs" />
     <Compile Include="UseCases\LocationUseCase.cs" />
     <Compile Include="Extensions\LatLonExtensions.cs" />
+    <Compile Include="ValueConverters\RecordTitleConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="ReactiveProperty, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">

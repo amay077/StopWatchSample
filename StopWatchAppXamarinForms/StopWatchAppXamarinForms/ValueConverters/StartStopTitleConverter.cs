@@ -4,7 +4,7 @@ using Xamarin.Forms;
 
 namespace StopWatchAppXamarinForms.ValueConverters
 {
-    class ButtonTitleConverter : IValueConverter
+    class StartStopTitleConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

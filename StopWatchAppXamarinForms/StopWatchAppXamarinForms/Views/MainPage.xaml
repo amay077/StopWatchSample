@@ -5,11 +5,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vc="clr-namespace:StopWatchAppXamarinForms.ValueConverters;assembly=StopWatchAppXamarinForms"
     x:Class="StopWatchAppXamarinForms.Views.MainPage"
-    Title="StopWatch">
+    Title="GPS App">
 
     <ContentPage.Resources>
         <ResourceDictionary>
-            <vc:ButtonTitleConverter x:Key="titleConverter" />
+            <vc:StartStopTitleConverter x:Key="startStopConverter" />
+            <vc:RecordTitleConverter x:Key="recordConverter" />
         </ResourceDictionary>
     </ContentPage.Resources>
     
@@ -57,10 +58,10 @@
                    HorizontalOptions="Start" />
 
             <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-                    Text="{Binding IsRunning.Value, Converter={StaticResource titleConverter}}"
+                    Text="{Binding IsRunning.Value, Converter={StaticResource startStopConverter}}"
                     Command="{Binding StartOrStopCommand}" />
             <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
-                    Text="Record"
+                    Text="{Binding RecordCount.Value, Converter={StaticResource recordConverter}}"
                     Command="{Binding RecordCommand}" />
 
             <Switch Grid.Row="5" Grid.Column="0"

@@ -7,6 +7,7 @@ using Prism.Navigation;
 using Prism.Services;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
+using StopWatchAppXamarinForms.Api.DataModels;
 using StopWatchAppXamarinForms.Extensions;
 using StopWatchAppXamarinForms.Models;
 using StopWatchAppXamarinForms.UseCases;
@@ -17,7 +18,7 @@ namespace StopWatchAppXamarinForms.ViewModels
     {
         readonly CompositeDisposable _subscriptions = new CompositeDisposable();
 
-        // ■ViewModel として公開するプロパティ
+        // View向けに公開する変更通知プロパティ
 
         /// <summary> 緯度、経度、時刻 </summary>
         public ReadOnlyReactiveProperty<string> FormattedLatitude { get; }
@@ -27,8 +28,10 @@ namespace StopWatchAppXamarinForms.ViewModels
         public ReadOnlyReactiveProperty<bool> IsRunning { get; }
         /// <summary> 度分秒表示か？ </summary>
         public ReactiveProperty<bool> IsDmsFormat { get; } = new ReactiveProperty<bool>(false);
+        /// <summary> 記録した数 </summary>
+        public ReadOnlyReactiveProperty<int> RecordCount { get; }
 
-        // ■ViewModel として公開するコマンド
+        // View向けに公開するコマンド
 
         /// <summary> 開始 or 終了 </summary>
         public ReactiveCommand StartOrStopCommand { get; }
@@ -39,40 +42,52 @@ namespace StopWatchAppXamarinForms.ViewModels
             IPageDialogService dialogService, LocationUseCase locationUseCase)
         {
             // ■プロパティの実装
-            // StopWatchModel の各プロパティをそのまま公開してるだけ
+            // LocationUseCase の各プロパティを必要なら加工して公開
             IsRunning = locationUseCase.IsRunning.ToReadOnlyReactiveProperty();
 
-            // 表示用にthrottleで20ms毎に間引き。View側でやってもよいかも。
-            //FormattedTime = stopWatch.FormattedTime
-            //    //.Do(x=> Debug.WriteLine($"Throttled:{x}"))
-            //    .ToReadOnlyReactiveProperty();
+            // Location の時刻をフォーマットして公開
             FormattedTime = locationUseCase.Location
                 .Select(l => l.Time.ToString("HH:mm:ss"))
                 .ToReadOnlyReactiveProperty();
 
+            // Location の緯度を度分秒または度にフォーマットして公開
             FormattedLatitude = IsDmsFormat.CombineLatest(
                 locationUseCase.Location.Select(l => l.Latitude),
                     (isDms, lat) => lat.Format(isDms))
                .ToReadOnlyReactiveProperty();
             
+            // Location の経度を度分秒または度にフォーマットして公開
             FormattedLongitude = IsDmsFormat.CombineLatest(
                 locationUseCase.Location.Select(l => l.Longitude),
                     (isDms, lon) => lon.Format(isDms))
                .ToReadOnlyReactiveProperty();
 
-            //// STOP されたら、最速／最遅ラップを表示して、LapActivity へ遷移
-            IsRunning.Buffer(2, 1).Where(x => x[0] && !x[1])
+            // 記録されたレコード群を件数として公開
+            RecordCount = locationUseCase.Records
+                .ToCollectionChanged()
+                .Select(_ => locationUseCase.Records.Count)
+                .ToReadOnlyReactiveProperty();
+
+            //// STOP されたら、最も精度のよい位置情報を表示して、RecordsPage へ遷移
+            IsRunning
+                .Buffer(2, 1)
+                .Where(x => x[0] && !x[1])
                 .Subscribe(async _ =>
                 {
-                    //// Alert を表示させる
-                    //await dialogService.DisplayAlertAsync(
-                    //    "Fastest/Worst Lap",
-                    //    $"Fastest:{stopWatch.FormattedFastestLap.Value}\n" +
-                    //    $"Worst:{stopWatch.FormattedWorstLap.Value}",
-                    //    "Close");
+                    // 最も精度のよい緯度経度を得る
+                    //  返値がメソッドは、その時点の情報でしかない(Reactiveではない)ので注意すること
+                    var bestLocation = locationUseCase.GetBestLocation();
 
-                    // RecordPage へ遷移させる
-                    await navigationService.NavigateAsync("RecordPage");
+                    var message = bestLocation.HasValue ?
+                        $"{bestLocation.Value.Latitude.Format(IsDmsFormat.Value)}/" +
+                        $"{bestLocation.Value.Longitude.Format(IsDmsFormat.Value)} です。" : 
+                        "記録されてません";
+                
+                    //// Alert を表示させる
+                    await dialogService.DisplayAlertAsync("最も精度の良い位置は", message, "Close");
+
+                    // RecordPage へ遷移させる    
+                    await navigationService.NavigateAsync("RecordsPage");
                 })
                 .AddTo(_subscriptions);
 
@@ -83,14 +98,16 @@ namespace StopWatchAppXamarinForms.ViewModels
             StartOrStopCommand.Subscribe(_ =>
                 {
                     locationUseCase.StartOrStop();
-                });
+                })
+                .AddTo(_subscriptions);
 
             // 位置情報の記録
             RecordCommand = IsRunning.ToReactiveCommand(); // 実行中のみ記録可能
             RecordCommand.Subscribe(_ =>
                 {
                     locationUseCase.Record();
-                });
+                })
+                .AddTo(_subscriptions);
         }
 
         #region IDisposable implementation

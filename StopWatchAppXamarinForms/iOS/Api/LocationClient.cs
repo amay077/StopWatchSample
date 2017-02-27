@@ -11,7 +11,11 @@ namespace StopWatchAppXamarinForms.iOS.Api
     {
         readonly CLLocationManager _locationManager;
 
+        public Location? LatestLocation { get; private set; }
+        public bool IsRunning { get; private set; }
+
         public event EventHandler<Location> LocationChanged;
+        public event EventHandler<bool> IsRunningChanged;
 
         public LocationClient()
         {
@@ -22,12 +26,14 @@ namespace StopWatchAppXamarinForms.iOS.Api
                 var l = e?.Locations?.FirstOrDefault() ?? null;
                 if (l != null)
                 {
-                    LocationChanged?.Invoke(this, new Location(
+                    var location = new Location(
                         l.Coordinate.Latitude,
                         l.Coordinate.Longitude,
                         l.HorizontalAccuracy,
                         l.Timestamp.ToDateTime()
-                    ));
+                    );
+                    LatestLocation = location;
+                    LocationChanged?.Invoke(this, location);
                 }
             };
 
@@ -38,11 +44,15 @@ namespace StopWatchAppXamarinForms.iOS.Api
         public void Start()
         {
             _locationManager.StartUpdatingLocation();
+            IsRunning = true;
+            IsRunningChanged?.Invoke(this, IsRunning);
         }
 
         public void Stop()
         {
             _locationManager.StopUpdatingLocation();
+            IsRunning = false;
+            IsRunningChanged?.Invoke(this, IsRunning);
         }
     }
 }

@@ -27,7 +27,7 @@ namespace StopWatchAppXamarinForms
 
             Container.RegisterTypeForNavigation<NavigationPage>();
             Container.RegisterTypeForNavigation<MainPage>();
-            Container.RegisterTypeForNavigation<LapPage>();
+            Container.RegisterTypeForNavigation<RecordsPage>();
         }
 
         protected override void ConfigureViewModelLocator()

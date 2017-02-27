@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ContentPage 
+    xmlns="http://xamarin.com/schemas/2014/forms" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+    x:Class="StopWatchAppXamarinForms.Views.RecordsPage"
+    Title="Records">
+    <ContentPage.Content>
+        <Grid Padding="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Switch Grid.Row="0" Grid.Column="0"
+                    IsToggled="{Binding IsDmsFormat.Value}"
+                    HorizontalOptions="End"/>
+            <Label  Grid.Row="0" Grid.Column="1"
+                    Text="度分秒で表示" 
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center"/>
+            
+            <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                      VerticalOptions="FillAndExpand"
+                      ItemsSource="{Binding FormattedRecords.Value}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextCell Text="{Binding .}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

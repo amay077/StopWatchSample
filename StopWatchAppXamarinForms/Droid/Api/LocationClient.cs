@@ -20,6 +20,8 @@ namespace StopWatchAppXamarinForms.Droid.Api
 
         public bool IsRunning { get; private set; }
 
+        public Location? LatestLocation { get; private set; }
+
         public LocationClient(Context context)
         {
             _locationManager = (LocationManager)context.GetSystemService(Context.LocationService);
@@ -41,12 +43,14 @@ namespace StopWatchAppXamarinForms.Droid.Api
 
         void ILocationListener.OnLocationChanged(ALocation location)
         {
-            LocationChanged?.Invoke(this, new Location(
+            var l = new Location(
                 location.Latitude,
                 location.Longitude,
                 location.Accuracy,
-                UNIX_EPOCH.AddMilliseconds(location.Time)
-            ));
+                UNIX_EPOCH.AddMilliseconds(location.Time));
+
+            LatestLocation = l;
+            LocationChanged?.Invoke(this, l);
         }
 
         void ILocationListener.OnProviderDisabled(string provider)
