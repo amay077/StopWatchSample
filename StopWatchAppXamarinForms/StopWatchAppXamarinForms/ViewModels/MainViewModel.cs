@@ -8,6 +8,7 @@ using Prism.Services;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 using StopWatchAppXamarinForms.Models;
+using StopWatchAppXamarinForms.UseCases;
 
 namespace StopWatchAppXamarinForms.ViewModels
 {
@@ -36,7 +37,7 @@ namespace StopWatchAppXamarinForms.ViewModels
         public ReactiveCommand ToggleVisibleMillisCommand { get; } = new ReactiveCommand(); // いつでも実行可能
 
         public MainViewModel(INavigationService navigationService,
-            IPageDialogService dialogService, IStopWatchModel stopWatch)
+            IPageDialogService dialogService, IStopWatchModel stopWatch, LocationUseCase locationUseCase)
         {
             // ■プロパティの実装
             // StopWatchModel の各プロパティをそのまま公開してるだけ

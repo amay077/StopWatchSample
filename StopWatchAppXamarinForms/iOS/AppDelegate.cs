@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Foundation;
+using Microsoft.Practices.Unity;
+using Prism.Unity;
+using StopWatchAppXamarinForms.Api;
+using StopWatchAppXamarinForms.iOS.Api;
 using UIKit;
 
 namespace StopWatchAppXamarinForms.iOS
@@ -17,6 +21,15 @@ namespace StopWatchAppXamarinForms.iOS
             LoadApplication(new FormsApp());
 
             return base.FinishedLaunching(app, options);
+        }
+    }
+
+    public class iOSInitializer : IPlatformInitializer
+    {
+        public void RegisterTypes(IUnityContainer container)
+        {
+            container.RegisterType<ILocationClient, LocationClient>(
+                new ContainerControlledLifetimeManager());
         }
     }
 }

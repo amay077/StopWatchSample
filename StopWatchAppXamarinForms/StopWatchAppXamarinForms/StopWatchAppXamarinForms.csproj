@@ -49,6 +49,9 @@
     <Compile Include="ViewModels\LapViewModel.cs" />
     <Compile Include="Models\StopWatchModel.cs" />
     <Compile Include="ValueConverters\ButtonTitleConverter.cs" />
+    <Compile Include="Api\ILocationClient.cs" />
+    <Compile Include="Api\DataModels\Location.cs" />
+    <Compile Include="UseCases\LocationUseCase.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="ReactiveProperty, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
@@ -99,6 +102,9 @@
     <Folder Include="ViewModels\" />
     <Folder Include="Models\" />
     <Folder Include="ValueConverters\" />
+    <Folder Include="Api\" />
+    <Folder Include="Api\DataModels\" />
+    <Folder Include="UseCases\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ProjectExtensions>

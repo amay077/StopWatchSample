@@ -7,6 +7,11 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Android.OS;
+using Microsoft.Practices.Unity;
+using Prism.Unity;
+using StopWatchAppXamarinForms.Api;
+using StopWatchAppXamarinForms.Droid.Api;
+using Xamarin.Forms;
 
 namespace StopWatchAppXamarinForms.Droid
 {
@@ -23,6 +28,16 @@ namespace StopWatchAppXamarinForms.Droid
             global::Xamarin.Forms.Forms.Init(this, bundle);
 
             LoadApplication(new FormsApp());
+        }
+    }
+
+    public class AndroidInitializer : IPlatformInitializer
+    {
+        public void RegisterTypes(IUnityContainer container)
+        {
+            container.RegisterType<ILocationClient, LocationClient>(
+                new ContainerControlledLifetimeManager(),
+                new InjectionConstructor(Forms.Context));
         }
     }
 }

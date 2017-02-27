@@ -3,6 +3,7 @@ using Microsoft.Practices.Unity;
 using Prism.Mvvm;
 using Prism.Unity;
 using StopWatchAppXamarinForms.Models;
+using StopWatchAppXamarinForms.UseCases;
 using StopWatchAppXamarinForms.Views;
 using Xamarin.Forms;
 
@@ -10,6 +11,10 @@ namespace StopWatchAppXamarinForms
 {
     public class FormsApp : PrismApplication
     {
+        public FormsApp(IPlatformInitializer initializer = null) : base(initializer) 
+        {
+        }
+
         protected override void OnInitialized()
         {
             NavigationService.NavigateAsync("NavigationPage/MainPage");
@@ -18,6 +23,7 @@ namespace StopWatchAppXamarinForms
         protected override void RegisterTypes()
         {
             Container.RegisterType<IStopWatchModel, StopWatchModel>(new ContainerControlledLifetimeManager());
+            Container.RegisterType<LocationUseCase, LocationUseCase>(new ContainerControlledLifetimeManager());
 
             Container.RegisterTypeForNavigation<NavigationPage>();
             Container.RegisterTypeForNavigation<MainPage>();
